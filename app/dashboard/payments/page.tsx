@@ -191,7 +191,7 @@ function PaymentsPageContent() {
             type="button"
             size="sm"
             variant="outline"
-            className="min-h-10 flex-1"
+            className="flex-1"
             onClick={() => modal.open("view", payRun.id)}
           >
             View
@@ -201,7 +201,7 @@ function PaymentsPageContent() {
               type="button"
               size="sm"
               variant="outline"
-              className="min-h-10 flex-1 text-destructive"
+              className="flex-1 text-destructive"
               onClick={() => setCancelId(payRun.id)}
             >
               Cancel

@@ -170,7 +170,7 @@ function OnboardingContent() {
   if (isLoading || !data) {
     return (
       <div className="mx-auto flex min-h-screen max-w-3xl flex-col gap-4 p-6">
-        <Skeleton className="h-10 w-64" />
+        <Skeleton className="h-11 w-64" />
         <Skeleton className="h-48 w-full" />
         <Skeleton className="h-48 w-full" />
       </div>

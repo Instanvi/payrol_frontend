@@ -19,6 +19,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 
 interface FacetedFilterOption {
@@ -45,7 +46,7 @@ export function DataTableFacetedFilter({
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" className="h-10 min-h-10 border-dashed sm:h-8 sm:min-h-8">
+        <Button variant="outline" size="sm" className="border-dashed">
           <PlusCircleIcon className="size-4" />
           {title}
           {selected && (
@@ -125,18 +126,10 @@ export function ServerDataTableToolbar({
   children,
   actions,
 }: ServerDataTableToolbarProps) {
-  const actionButtonClass =
-    "[&_button]:h-10 [&_button]:min-h-10 sm:[&_button]:h-8 sm:[&_button]:min-h-8"
-
   return (
-    <div
-      className={cn(
-        "flex flex-wrap items-center gap-2",
-        actionButtonClass
-      )}
-    >
-      <input
-        className="flex h-10 min-h-10 min-w-0 flex-1 basis-[8rem] rounded-[2px] border border-input bg-background px-3 py-2 text-base shadow-none outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 sm:h-8 sm:min-h-8 sm:flex-none sm:basis-auto sm:w-[150px] sm:py-1 sm:text-sm lg:w-[250px]"
+    <div className="flex flex-wrap items-center gap-2">
+      <Input
+        className="min-w-0 flex-1 basis-[8rem] sm:flex-none sm:basis-auto sm:w-[150px] lg:w-[250px]"
         placeholder={searchPlaceholder}
         value={search}
         onChange={(e) => onSearchChange(e.target.value)}

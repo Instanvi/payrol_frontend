@@ -107,9 +107,9 @@ export function AcceptInviteForm({ token }: AcceptInviteFormProps) {
     return (
       <div className="space-y-4">
         <Skeleton className="h-4 w-3/4" />
-        <Skeleton className="h-10 w-full" />
-        <Skeleton className="h-10 w-full" />
-        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-11 w-full" />
+        <Skeleton className="h-11 w-full" />
+        <Skeleton className="h-11 w-full" />
       </div>
     )
   }

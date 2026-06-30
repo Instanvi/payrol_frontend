@@ -29,7 +29,7 @@ export function PageHeader({
         )}
       </div>
       {actions ? (
-        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap [&_button]:min-h-10">
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap [&_button]:min-h-11">
           {actions}
         </div>
       ) : null}
