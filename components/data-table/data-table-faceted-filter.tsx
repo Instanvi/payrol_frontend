@@ -136,7 +136,7 @@ export function ServerDataTableToolbar({
       )}
     >
       <input
-        className="flex h-10 min-h-10 min-w-0 flex-1 basis-[8rem] rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 sm:h-8 sm:min-h-8 sm:flex-none sm:basis-auto sm:w-[150px] sm:py-1 sm:text-sm lg:w-[250px]"
+        className="flex h-10 min-h-10 min-w-0 flex-1 basis-[8rem] rounded-[2px] border border-input bg-background px-3 py-2 text-base shadow-none outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 sm:h-8 sm:min-h-8 sm:flex-none sm:basis-auto sm:w-[150px] sm:py-1 sm:text-sm lg:w-[250px]"
         placeholder={searchPlaceholder}
         value={search}
         onChange={(e) => onSearchChange(e.target.value)}

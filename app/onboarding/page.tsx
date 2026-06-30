@@ -367,7 +367,7 @@ function KycUploadRow({
   const inputRef = React.useRef<HTMLInputElement>(null)
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3">
+    <div className="flex flex-wrap items-center justify-between gap-3 rounded-[2px] bg-muted/40 p-3">
       <div className="flex items-center gap-2">
         {uploaded ? (
           <CheckCircle2Icon className="h-4 w-4 text-primary" />

@@ -16,10 +16,10 @@ export default function DashboardLayout({
 }) {
   return (
     <AuthGuard>
-      <SidebarProvider>
+      <SidebarProvider className="min-h-svh bg-main-bg">
         <AppSidebar />
-        <SidebarInset className="min-w-0 bg-gray-100" data-dashboard>
-          <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center gap-2 bg-dashboard-canvas/95 backdrop-blur supports-backdrop-filter:bg-dashboard-canvas/90 sm:h-16">
+        <SidebarInset className="min-w-0 overflow-x-hidden border-l border-black/4 bg-main-bg" data-dashboard>
+          <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center gap-2 border-b border-black/6 bg-white sm:h-16">
             <div className="flex min-w-0 flex-1 items-center gap-2 px-3 sm:px-4">
               <SidebarTrigger className="-ml-1 size-10 shrink-0 sm:size-8" />
               <Separator
