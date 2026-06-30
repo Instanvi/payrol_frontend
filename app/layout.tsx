@@ -1,14 +1,12 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Inter } from "next/font/google";
+import { Figtree, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AppProviders } from "@/components/providers/app-providers";
 import { cn } from "@/lib/utils";
 
-const inter = Inter({subsets:['latin'],variable:'--font-sans'});
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const figtree = Figtree({
   subsets: ["latin"],
+  variable: "--font-sans",
 });
 
 const geistMono = Geist_Mono({
@@ -35,7 +33,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={cn("light h-full antialiased", geistSans.variable, geistMono.variable, "font-sans", inter.variable)}
+      className={cn("light h-full antialiased", figtree.variable, geistMono.variable, "font-sans")}
     >
       <body className="min-h-full flex flex-col">
         <AppProviders>{children}</AppProviders>

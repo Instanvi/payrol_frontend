@@ -100,7 +100,7 @@
   }
 
   [data-dashboard] [data-slot="card"] {
-    @apply border-0 shadow-none ring-0;
+    @apply min-h-[10rem] border-0 shadow-none ring-0;
   }
 
   [data-dashboard] [data-slot="table-head"]:not(:last-child),
