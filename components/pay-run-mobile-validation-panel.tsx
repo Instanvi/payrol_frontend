@@ -109,6 +109,16 @@ export function PayRunMobileValidationPanel({
       .reduce((sum, line) => sum + line.amount, 0)
   }, [data, disburseTargetIds])
 
+  const disburseTargetFees = React.useMemo(() => {
+    if (!data) return 0
+    const ids = new Set(disburseTargetIds)
+    return data.lines
+      .filter((line) => ids.has(line.transactionId))
+      .reduce((sum, line) => sum + (line.platformFee ?? 0), 0)
+  }, [data, disburseTargetIds])
+
+  const disburseTargetTotal = disburseTargetAmount + disburseTargetFees
+
   const disburseTargetCount = disburseTargetIds.length
   const retryCount = eligibleLines.filter(
     (line) => line.transactionStatus === "failed"
@@ -216,9 +226,25 @@ export function PayRunMobileValidationPanel({
     },
     {
       accessorKey: "amount",
-      header: "Amount",
+      header: "Net pay",
       cell: ({ row }) =>
         `${row.original.currency} ${row.original.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
+    },
+    {
+      accessorKey: "platformFee",
+      header: "Fee",
+      cell: ({ row }) =>
+        row.original.platformFee != null
+          ? `${row.original.currency} ${row.original.platformFee.toLocaleString(undefined, { minimumFractionDigits: 2 })}`
+          : "—",
+    },
+    {
+      id: "totalCharge",
+      header: "Total",
+      cell: ({ row }) =>
+        row.original.totalCharge != null
+          ? `${row.original.currency} ${row.original.totalCharge.toLocaleString(undefined, { minimumFractionDigits: 2 })}`
+          : "—",
     },
     {
       id: "actions",
@@ -274,8 +300,8 @@ export function PayRunMobileValidationPanel({
             <h3 className="text-sm font-medium">Mobile money validation</h3>
           </div>
           <p className="text-xs text-muted-foreground">
-            Select pending or failed lines to disburse. Processing and paid lines
-            cannot be selected again.
+            Select pending or failed lines to disburse via Instanvi. Employees
+            receive net pay; platform fees are added on top.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -326,8 +352,16 @@ export function PayRunMobileValidationPanel({
         <SummaryStat label="MTN" value={data.summary.mtn} />
         <SummaryStat label="Orange" value={data.summary.orange} />
         <SummaryStat
-          label="Ready total"
+          label="Ready total (net)"
           value={`${data.lines[0]?.currency ?? ""} ${data.summary.totalMobileAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}`.trim()}
+        />
+        <SummaryStat
+          label="Platform fees"
+          value={`${data.lines[0]?.currency ?? ""} ${data.summary.totalPlatformFees.toLocaleString(undefined, { minimumFractionDigits: 2 })}`.trim()}
+        />
+        <SummaryStat
+          label="Total with fees"
+          value={`${data.lines[0]?.currency ?? ""} ${data.summary.totalWithFees.toLocaleString(undefined, { minimumFractionDigits: 2 })}`.trim()}
         />
       </div>
 
@@ -373,15 +407,41 @@ export function PayRunMobileValidationPanel({
       >
         <div className="space-y-3 text-sm text-muted-foreground">
           <p>
-            This will queue mobile money payments for{" "}
-            <strong>{disburseTargetCount}</strong> employee(s) totalling{" "}
-            <strong>
-              {data.lines[0]?.currency}{" "}
-              {disburseTargetAmount.toLocaleString(undefined, {
-                minimumFractionDigits: 2,
-              })}
-            </strong>
-            .
+            This will send mobile money to{" "}
+            <strong>{disburseTargetCount}</strong> employee(s) via Instanvi.
+          </p>
+          <div className="rounded-xl bg-muted/40 p-3 text-foreground">
+            <div className="flex justify-between gap-4">
+              <span>Net pay to employees</span>
+              <strong>
+                {data.lines[0]?.currency}{" "}
+                {disburseTargetAmount.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                })}
+              </strong>
+            </div>
+            <div className="mt-2 flex justify-between gap-4">
+              <span>Platform fees (on top)</span>
+              <strong>
+                {data.lines[0]?.currency}{" "}
+                {disburseTargetFees.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                })}
+              </strong>
+            </div>
+            <div className="mt-2 flex justify-between gap-4 border-t border-border pt-2">
+              <span>Total</span>
+              <strong>
+                {data.lines[0]?.currency}{" "}
+                {disburseTargetTotal.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                })}
+              </strong>
+            </div>
+          </div>
+          <p className="text-xs">
+            Payment is funded from your Instanvi account. Each employee receives
+            only their net pay amount.
           </p>
           {selectedEligibleIds.length > 0 ? (
             <p>Only the eligible employees you selected will be paid.</p>

@@ -69,6 +69,8 @@ export interface MobilePayRunLine {
   mobileEligible: boolean
   accountChecked: boolean
   mobileAccountValid: boolean | null
+  platformFee?: number
+  totalCharge?: number
   error?: string
 }
 
@@ -91,6 +93,8 @@ export interface MobilePayRunValidation {
     accountValid: number
     mobileEligible: number
     totalMobileAmount: number
+    totalPlatformFees: number
+    totalWithFees: number
   }
   lines: MobilePayRunLine[]
 }
@@ -102,7 +106,7 @@ export interface BulkDisburseResult {
   currency: string
   totalAmount: number
   totalPlatformFees?: number
-  totalDebit?: number
+  totalCharge?: number
   queuedCount: number
   skippedCount: number
   selectedCount?: number
