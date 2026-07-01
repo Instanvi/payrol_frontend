@@ -26,6 +26,7 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
 import { Skeleton } from "@/components/ui/skeleton"
 import { companiesService } from "@/lib/services/companies.service"
 import type { CompanyStatus, KycDocumentType } from "@/lib/types"
@@ -169,10 +170,10 @@ function OnboardingContent() {
 
   if (isLoading || !data) {
     return (
-      <div className="mx-auto flex min-h-screen max-w-3xl flex-col gap-4 p-6">
-        <Skeleton className="h-11 w-64" />
-        <Skeleton className="h-48 w-full" />
-        <Skeleton className="h-48 w-full" />
+      <div className="flex flex-col gap-6">
+        <Skeleton className="h-11 w-72" />
+        <Skeleton className="h-56 w-full" />
+        <Skeleton className="h-56 w-full" />
       </div>
     )
   }
@@ -182,44 +183,54 @@ function OnboardingContent() {
   const isPendingReview = company.status === "pending_review"
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-3xl flex-col gap-4 p-4 sm:gap-6 sm:p-6">
-      <header className="space-y-1 border-b pb-4">
-        <div className="flex items-center gap-2">
-          <Building2Icon className="h-6 w-6 text-primary" />
-          <h1 className="text-2xl font-semibold">Company onboarding</h1>
+    <div className="flex flex-col gap-6 lg:gap-8">
+      <header className="space-y-3 border-b pb-5">
+        <div className="flex items-center gap-3">
+          <Building2Icon className="h-7 w-7 shrink-0 text-primary" />
+          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+            Company onboarding
+          </h1>
         </div>
-        <p className="text-sm text-muted-foreground">
-          Step {isPendingReview ? 2 : step} of 2
-          {!isPendingReview && (step === 1 ? " — Company profile" : " — KYC documents")}
-        </p>
-        <p className="text-sm">
-          <span className="text-muted-foreground">KYC status: </span>
-          <span className="font-medium">{kycStatus}</span>
-          {company.status === "rejected" && company.rejectionReason && (
-            <span className="mt-1 block text-muted-foreground">
-              {company.rejectionReason}
-            </span>
-          )}
-        </p>
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
+          <p className="text-muted-foreground">
+            Step {isPendingReview ? 2 : step} of 2
+            {!isPendingReview &&
+              (step === 1 ? " — Company profile" : " — KYC documents")}
+          </p>
+          <p>
+            <span className="text-muted-foreground">KYC status: </span>
+            <span className="font-medium">{kycStatus}</span>
+          </p>
+        </div>
+        {company.status === "rejected" && company.rejectionReason && (
+          <p className="max-w-3xl text-sm text-muted-foreground">
+            {company.rejectionReason}
+          </p>
+        )}
       </header>
 
       {isPendingReview ? (
-        <Card>
+        <Card className="shadow-sm">
           <CardHeader>
             <CardTitle>Under review</CardTitle>
-            <CardDescription>
+            <CardDescription className="max-w-3xl text-base leading-relaxed">
               Your KYC package was submitted. A platform admin will approve your
               company before payments are enabled. You can continue managing
               employees and payroll setup in the meantime.
             </CardDescription>
           </CardHeader>
+          <CardContent>
+            <Button type="button" onClick={() => router.push("/dashboard")}>
+              Go to dashboard
+            </Button>
+          </CardContent>
         </Card>
       ) : step === 1 ? (
-        <Card>
+        <Card className="shadow-sm">
           <CardHeader>
             <CardTitle>Company profile</CardTitle>
-            <CardDescription>
-              Legal details required for compliance review
+            <CardDescription className="max-w-3xl text-base leading-relaxed">
+              Legal and business details required for compliance review
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -228,80 +239,132 @@ function OnboardingContent() {
                 onSubmit={profileForm.handleSubmit((values) =>
                   saveProfile.mutate(values)
                 )}
-                className="grid gap-4 sm:grid-cols-2"
+                className="space-y-8"
               >
-                <FormField
-                  control={profileForm.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Display name</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={profileForm.control}
-                  name="legalName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Legal name</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={profileForm.control}
-                  name="taxId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Tax ID</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={profileForm.control}
-                  name="billingEmail"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Billing email</FormLabel>
-                      <FormControl>
-                        <Input type="email" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={profileForm.control}
-                  name="address"
-                  render={({ field }) => (
-                    <FormItem className="sm:col-span-2">
-                      <FormLabel>Business address</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <div className="flex justify-center sm:col-span-2">
+                <section className="space-y-4">
+                  <h2 className="text-sm font-medium">Business identity</h2>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <FormField
+                      control={profileForm.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Display name</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={profileForm.control}
+                      name="legalName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Legal name</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={profileForm.control}
+                      name="industry"
+                      render={({ field }) => (
+                        <FormItem className="md:col-span-2">
+                          <FormLabel>Industry</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="e.g. Retail, Technology, Agriculture"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </section>
+
+                <section className="space-y-4">
+                  <h2 className="text-sm font-medium">Registration & billing</h2>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <FormField
+                      control={profileForm.control}
+                      name="taxId"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Tax ID</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={profileForm.control}
+                      name="billingEmail"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Billing email</FormLabel>
+                          <FormControl>
+                            <Input type="email" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </section>
+
+                <section className="space-y-4">
+                  <h2 className="text-sm font-medium">Business location</h2>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <FormField
+                      control={profileForm.control}
+                      name="address"
+                      render={({ field }) => (
+                        <FormItem className="md:col-span-2">
+                          <FormLabel>Business address</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              rows={3}
+                              placeholder="Street, city, region, country"
+                              className="min-h-24 resize-y"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={profileForm.control}
+                      name="timezone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Timezone</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Africa/Douala" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </section>
+
+                <div className="flex justify-end border-t pt-6">
                   <Button
                     type="submit"
-                    className="min-w-40"
+                    className="min-w-44"
                     disabled={saveProfile.isPending}
                   >
-                    {saveProfile.isPending ? "Saving..." : "Next"}
+                    {saveProfile.isPending ? "Saving..." : "Save and continue"}
                   </Button>
                 </div>
               </form>
@@ -309,37 +372,39 @@ function OnboardingContent() {
           </CardContent>
         </Card>
       ) : (
-        <Card>
+        <Card className="shadow-sm">
           <CardHeader>
             <CardTitle>KYC documents</CardTitle>
-            <CardDescription>
+            <CardDescription className="max-w-3xl text-base leading-relaxed">
               Upload PDF or image files (max 5MB). Required: business
               registration, tax certificate, and director ID.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {REQUIRED_DOCS.map((docType) => (
-              <KycUploadRow
-                key={docType}
-                docType={docType}
-                uploaded={documents.find((d) => d.documentType === docType)}
-                disabled={uploadDoc.isPending}
-                onUpload={(file) =>
-                  uploadDoc.mutate({ documentType: docType, file })
-                }
-              />
-            ))}
+            <div className="space-y-3">
+              {REQUIRED_DOCS.map((docType) => (
+                <KycUploadRow
+                  key={docType}
+                  docType={docType}
+                  uploaded={documents.find((d) => d.documentType === docType)}
+                  disabled={uploadDoc.isPending}
+                  onUpload={(file) =>
+                    uploadDoc.mutate({ documentType: docType, file })
+                  }
+                />
+              ))}
+            </div>
             {missingDocuments.length > 0 && (
-              <p className="text-center text-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 Missing: {missingDocuments.map((t) => KYC_LABELS[t]).join(", ")}
               </p>
             )}
-            <div className="flex flex-wrap justify-center gap-2 pt-2">
+            <div className="flex flex-wrap justify-end gap-3 border-t pt-6">
               <Button type="button" variant="outline" onClick={() => setStep(1)}>
                 Back
               </Button>
               <Button
-                className="min-w-40"
+                className="min-w-44"
                 onClick={() => submitKyc.mutate()}
                 disabled={!canSubmitKyc || submitKyc.isPending}
               >
@@ -367,21 +432,23 @@ function KycUploadRow({
   const inputRef = React.useRef<HTMLInputElement>(null)
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 rounded-[2px] bg-muted/40 p-3">
-      <div className="flex items-center gap-2">
+    <div className="grid gap-4 rounded-lg bg-muted/40 p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-6">
+      <div className="flex min-w-0 items-start gap-3">
         {uploaded ? (
-          <CheckCircle2Icon className="h-4 w-4 text-primary" />
+          <CheckCircle2Icon className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
         ) : (
-          <FileUpIcon className="h-4 w-4 text-muted-foreground" />
+          <FileUpIcon className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" />
         )}
-        <div>
-          <p className="text-sm font-medium">{KYC_LABELS[docType]}</p>
+        <div className="min-w-0">
+          <p className="text-sm font-medium leading-snug">{KYC_LABELS[docType]}</p>
           {uploaded && (
-            <p className="text-xs text-muted-foreground">{uploaded.fileName}</p>
+            <p className="mt-1 truncate text-xs text-muted-foreground">
+              {uploaded.fileName}
+            </p>
           )}
         </div>
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2 sm:justify-end">
         {uploaded?.fileUrl && (
           <Button asChild size="sm" variant="ghost">
             <a href={uploaded.fileUrl} target="_blank" rel="noopener noreferrer">
