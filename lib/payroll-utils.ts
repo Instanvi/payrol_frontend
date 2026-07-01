@@ -1,4 +1,11 @@
 import type { PaymentStatus, TransactionStatus } from "@/lib/types"
+import { format } from "date-fns"
+
+export function generatePayRunReference(date = new Date()) {
+  const stamp = format(date, "yyyyMMdd")
+  const suffix = Math.random().toString(36).slice(2, 6).toUpperCase()
+  return `PAYROLL-${stamp}-${suffix}`
+}
 
 export function mapPayRunStatusToTransactionStatus(
   status: PaymentStatus

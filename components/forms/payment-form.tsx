@@ -36,7 +36,7 @@ import {
 import { format } from "date-fns"
 import type { Employee } from "@/lib/types"
 import { formatPayPeriodLabel } from "@/lib/date-utils"
-import { splitPayrollAmount } from "@/lib/payroll-utils"
+import { splitPayrollAmount, generatePayRunReference } from "@/lib/payroll-utils"
 import {
   Table,
   TableBody,
@@ -64,15 +64,21 @@ export function PaymentForm({
   const form = useForm<PaymentFormInput>({
     resolver: zodResolver(paymentFormSchema),
     defaultValues: {
-      reference: "",
+      reference: generatePayRunReference(),
       payPeriodRange: { from: undefined, to: undefined },
       amount: 0,
-      currency: "USD",
+      currency: "XAF",
       scheduledAt: undefined,
       projectId: "",
       employeeIds: [],
     },
   })
+
+  React.useEffect(() => {
+    if (!form.getValues("reference")) {
+      form.setValue("reference", generatePayRunReference())
+    }
+  }, [form])
 
   const projectId = form.watch("projectId")
   const { data: projectEmployees = [] } = useProjectEmployeesQuery(
@@ -154,7 +160,6 @@ export function PaymentForm({
       form
         .trigger([
           "projectId",
-          "reference",
           "payPeriodRange",
           "amount",
           "currency",
@@ -243,8 +248,11 @@ export function PaymentForm({
                   <FormItem>
                     <FormLabel>Pay run reference</FormLabel>
                     <FormControl>
-                      <Input placeholder="PAYROLL-2025-004" {...field} />
+                      <Input readOnly className="bg-muted/50" {...field} />
                     </FormControl>
+                    <p className="text-xs text-muted-foreground">
+                      Generated automatically for this pay run
+                    </p>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -282,7 +290,7 @@ export function PaymentForm({
                     <FormLabel>Currency</FormLabel>
                     <Select
                       onValueChange={field.onChange}
-                      defaultValue={field.value}
+                      value={field.value}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -290,10 +298,10 @@ export function PaymentForm({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
+                        <SelectItem value="XAF">XAF</SelectItem>
                         <SelectItem value="USD">USD</SelectItem>
                         <SelectItem value="EUR">EUR</SelectItem>
                         <SelectItem value="GBP">GBP</SelectItem>
-                        <SelectItem value="XAF">XAF</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />

@@ -2,12 +2,17 @@ import { format } from "date-fns"
 import { z } from "zod"
 
 import { formatPayPeriodLabel, toApiDateString } from "@/lib/date-utils"
+import { generatePayRunReference } from "@/lib/payroll-utils"
+
+export const PAYROLL_CURRENCIES = ["XAF", "USD", "EUR", "GBP"] as const
+
+export type PayrollCurrency = (typeof PAYROLL_CURRENCIES)[number]
 
 export const paymentSchema = z.object({
   reference: z.string().min(3, "Reference must be at least 3 characters"),
   payPeriod: z.string().min(3, "Pay period is required"),
   amount: z.number().positive("Total payroll amount must be greater than 0"),
-  currency: z.enum(["USD", "EUR", "GBP"]),
+  currency: z.enum(PAYROLL_CURRENCIES),
   scheduledAt: z.string().optional(),
   projectId: z.string().uuid("Select a project"),
   employeeIds: z
@@ -17,7 +22,7 @@ export const paymentSchema = z.object({
 
 export const paymentFormSchema = z
   .object({
-    reference: z.string().min(3, "Reference must be at least 3 characters"),
+    reference: z.string().optional(),
     payPeriodRange: z
       .object({
         from: z.date().optional(),
@@ -47,7 +52,7 @@ export const paymentFormSchema = z
         }
       }),
     amount: z.number().positive("Total payroll amount must be greater than 0"),
-    currency: z.enum(["USD", "EUR", "GBP"]),
+    currency: z.enum(PAYROLL_CURRENCIES),
     scheduledAt: z.date().optional(),
     projectId: z.string().uuid("Select a project"),
     employeeIds: z
@@ -65,7 +70,7 @@ export function paymentFormToPayload(values: PaymentFormInput): PaymentFormValue
   }
 
   return {
-    reference: values.reference,
+    reference: values.reference?.trim() || generatePayRunReference(),
     payPeriod: formatPayPeriodLabel(from, to),
     amount: values.amount,
     currency: values.currency,
