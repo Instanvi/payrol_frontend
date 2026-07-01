@@ -24,6 +24,7 @@ export interface Employee {
   email: string
   phone?: string
   department?: string
+  baseSalary?: number
   status: EmployeeStatus
   createdAt: string
   mobileCarrier?: MobileCarrier

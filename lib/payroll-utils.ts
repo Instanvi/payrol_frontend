@@ -31,3 +31,57 @@ export function splitPayrollAmount(total: number, count: number): number[] {
   amounts[count - 1] = Math.round((total - distributed + base) * 100) / 100
   return amounts
 }
+
+function roundMoney(value: number) {
+  return Math.round(value * 100) / 100
+}
+
+export interface PayrollLinePreview {
+  grossAmount: number
+  deductions: number
+  netPay: number
+}
+
+export function computePayrollFromNetPay(
+  netPay: number,
+  taxRatePercent = 0
+): PayrollLinePreview {
+  if (taxRatePercent <= 0) {
+    return {
+      grossAmount: roundMoney(netPay),
+      deductions: 0,
+      netPay: roundMoney(netPay),
+    }
+  }
+
+  const rate = taxRatePercent / 100
+  if (rate >= 1) {
+    return {
+      grossAmount: roundMoney(netPay),
+      deductions: 0,
+      netPay: roundMoney(netPay),
+    }
+  }
+
+  const gross = roundMoney(netPay / (1 - rate))
+  const deductions = roundMoney(gross - netPay)
+
+  return { grossAmount: gross, deductions, netPay: roundMoney(netPay) }
+}
+
+export function payrollLinesFromEmployees(
+  employees: { baseSalary?: number | null }[],
+  totalNetAmount: number,
+  taxRatePercent = 0
+): PayrollLinePreview[] {
+  const salaries = employees.map((e) => e.baseSalary ?? 0)
+  const hasSalaries = salaries.some((s) => s > 0)
+
+  const netPerEmployee = hasSalaries
+    ? salaries.map((s) => (s > 0 ? s : 0))
+    : splitPayrollAmount(totalNetAmount, employees.length)
+
+  return netPerEmployee.map((net) =>
+    computePayrollFromNetPay(net, taxRatePercent)
+  )
+}

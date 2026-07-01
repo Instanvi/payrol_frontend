@@ -11,8 +11,9 @@ export type PayrollCurrency = (typeof PAYROLL_CURRENCIES)[number]
 export const paymentSchema = z.object({
   reference: z.string().min(3, "Reference must be at least 3 characters"),
   payPeriod: z.string().min(3, "Pay period is required"),
-  amount: z.number().positive("Total payroll amount must be greater than 0"),
+  amount: z.number().positive("Total net payroll must be greater than 0"),
   currency: z.enum(PAYROLL_CURRENCIES),
+  taxRate: z.number().min(0).max(100).optional(),
   scheduledAt: z.string().optional(),
   projectId: z.string().uuid("Select a project"),
   employeeIds: z
@@ -51,8 +52,9 @@ export const paymentFormSchema = z
           })
         }
       }),
-    amount: z.number().positive("Total payroll amount must be greater than 0"),
+    amount: z.number().positive("Total net payroll must be greater than 0"),
     currency: z.enum(PAYROLL_CURRENCIES),
+    taxRate: z.number().min(0).max(100),
     scheduledAt: z.date().optional(),
     projectId: z.string().uuid("Select a project"),
     employeeIds: z
@@ -74,6 +76,7 @@ export function paymentFormToPayload(values: PaymentFormInput): PaymentFormValue
     payPeriod: formatPayPeriodLabel(from, to),
     amount: values.amount,
     currency: values.currency,
+    taxRate: values.taxRate > 0 ? values.taxRate : undefined,
     scheduledAt: toApiDateString(values.scheduledAt),
     projectId: values.projectId,
     employeeIds: values.employeeIds,

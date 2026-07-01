@@ -36,7 +36,7 @@ import {
 import { format } from "date-fns"
 import type { Employee } from "@/lib/types"
 import { formatPayPeriodLabel } from "@/lib/date-utils"
-import { splitPayrollAmount, generatePayRunReference } from "@/lib/payroll-utils"
+import { splitPayrollAmount, generatePayRunReference, payrollLinesFromEmployees } from "@/lib/payroll-utils"
 import {
   Table,
   TableBody,
@@ -68,6 +68,7 @@ export function PaymentForm({
       payPeriodRange: { from: undefined, to: undefined },
       amount: 0,
       currency: "XAF",
+      taxRate: 0,
       scheduledAt: undefined,
       projectId: "",
       employeeIds: [],
@@ -112,9 +113,13 @@ export function PaymentForm({
   const selectedEmployees = employees.filter((e) =>
     values.employeeIds.includes(e.id)
   )
-  const splitAmounts =
+  const payrollLines =
     values.employeeIds.length > 0
-      ? splitPayrollAmount(Number(values.amount), values.employeeIds.length)
+      ? payrollLinesFromEmployees(
+          selectedEmployees,
+          Number(values.amount),
+          Number(values.taxRate) || 0
+        )
       : []
 
   const columns: ColumnDef<Employee>[] = [
@@ -181,7 +186,8 @@ export function PaymentForm({
             <div className="space-y-1">
               <h3 className="text-base font-medium">Pay run details</h3>
               <p className="text-sm text-muted-foreground">
-                Set the pay period, total payroll amount, and disbursement date
+                Set the pay period, total net payroll, optional tax rate, and pay
+                date
               </p>
             </div>
             <div className="space-y-4">
@@ -261,7 +267,7 @@ export function PaymentForm({
                 name="amount"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Total payroll amount</FormLabel>
+                    <FormLabel>Total net payroll</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
@@ -277,6 +283,39 @@ export function PaymentForm({
                         }
                       />
                     </FormControl>
+                    <p className="text-xs text-muted-foreground">
+                      Amount employees receive before platform fees
+                    </p>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="taxRate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tax rate % (optional)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        max="100"
+                        {...field}
+                        onChange={(e) =>
+                          field.onChange(
+                            e.target.value === ""
+                              ? 0
+                              : parseFloat(e.target.value)
+                          )
+                        }
+                      />
+                    </FormControl>
+                    <p className="text-xs text-muted-foreground">
+                      Leave at 0 for no tax. Net pay stays as entered; tax is
+                      calculated on top for reporting.
+                    </p>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -403,7 +442,7 @@ export function PaymentForm({
                 <span className="font-medium">{values.reference}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Total payroll</span>
+                <span className="text-muted-foreground">Total net payroll</span>
                 <span className="font-medium">
                   {values.currency}{" "}
                   {Number(values.amount).toLocaleString(undefined, {
@@ -411,6 +450,12 @@ export function PaymentForm({
                   })}
                 </span>
               </div>
+              {Number(values.taxRate) > 0 && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Tax rate</span>
+                  <span className="font-medium">{values.taxRate}%</span>
+                </div>
+              )}
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Recipients</span>
                 <span className="font-medium">
@@ -439,11 +484,15 @@ export function PaymentForm({
                           <TableHead>Employee</TableHead>
                           <TableHead>Mobile number</TableHead>
                           <TableHead>Mobile account</TableHead>
+                          <TableHead className="text-right">Gross</TableHead>
+                          <TableHead className="text-right">Tax</TableHead>
                           <TableHead className="text-right">Net pay</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {selectedEmployees.map((employee, index) => (
+                        {selectedEmployees.map((employee, index) => {
+                          const line = payrollLines[index]
+                          return (
                           <TableRow key={employee.id}>
                             <TableCell>{employee.name}</TableCell>
                             <TableCell>{employee.phone ?? "—"}</TableCell>
@@ -455,13 +504,27 @@ export function PaymentForm({
                             </TableCell>
                             <TableCell className="text-right">
                               {values.currency}{" "}
-                              {(splitAmounts[index] ?? 0).toLocaleString(
+                              {(line?.grossAmount ?? 0).toLocaleString(
+                                undefined,
+                                { minimumFractionDigits: 2 }
+                              )}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              {values.currency}{" "}
+                              {(line?.deductions ?? 0).toLocaleString(
+                                undefined,
+                                { minimumFractionDigits: 2 }
+                              )}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              {values.currency}{" "}
+                              {(line?.netPay ?? 0).toLocaleString(
                                 undefined,
                                 { minimumFractionDigits: 2 }
                               )}
                             </TableCell>
                           </TableRow>
-                        ))}
+                        )})}
                       </TableBody>
                     </Table>
                   </div>
