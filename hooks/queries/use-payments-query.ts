@@ -32,6 +32,13 @@ export function usePayRunTransactionsQuery(payRunId: string | null) {
     queryKey: queryKeys.payments.transactions(payRunId ?? ""),
     queryFn: () => transactionsService.listByPayRun(payRunId!),
     enabled: !!payRunId,
+    refetchInterval: (query) => {
+      const rows = query.state.data
+      if (rows?.some((row) => row.status === "processing")) {
+        return 10_000
+      }
+      return false
+    },
   })
 }
 
