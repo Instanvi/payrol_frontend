@@ -1,6 +1,7 @@
 import { api } from "@/lib/api/axios"
 import type {
   Company,
+  InstanviIntegrationConfig,
   KycDocument,
   KycDocumentType,
   OnboardingStatus,
@@ -46,6 +47,30 @@ export const companiesService = {
   submitKyc() {
     return api
       .post<OnboardingStatus>("/companies/me/kyc/submit")
+      .then((res) => res.data)
+  },
+
+  getInstanviIntegration() {
+    return api
+      .get<InstanviIntegrationConfig>("/companies/me/integrations/instanvi")
+      .then((res) => res.data)
+  },
+
+  saveInstanviIntegration(input: { apiKey: string; locationId?: string }) {
+    return api
+      .put<InstanviIntegrationConfig>("/companies/me/integrations/instanvi", input)
+      .then((res) => res.data)
+  },
+
+  testInstanviIntegration() {
+    return api
+      .post<{ ok: true }>("/companies/me/integrations/instanvi/test")
+      .then((res) => res.data)
+  },
+
+  removeInstanviIntegration() {
+    return api
+      .delete<InstanviIntegrationConfig>("/companies/me/integrations/instanvi")
       .then((res) => res.data)
   },
 }

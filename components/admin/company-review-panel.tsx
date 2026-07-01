@@ -156,6 +156,14 @@ export function CompanyReviewPanel({
           value={formatDisplayDate(detail.company.approvedAt)}
         />
         <InfoField
+          label="Instanvi"
+          value={
+            detail.company.instanviConnected
+              ? `Connected${detail.company.instanviLocationId ? ` (${detail.company.instanviLocationId})` : ""}`
+              : "Not connected"
+          }
+        />
+        <InfoField
           label="Address"
           value={detail.company.address}
           className="sm:col-span-2"

@@ -53,4 +53,9 @@ export const queryKeys = {
     list: (params: ListParams) =>
       [...queryKeys.members.lists(), params] as const,
   },
+  companies: {
+    all: ["companies"] as const,
+    instanviIntegration: () =>
+      [...queryKeys.companies.all, "instanvi-integration"] as const,
+  },
 }

@@ -12,6 +12,7 @@ import {
   MobileCarrierBadge,
 } from "@/components/employee-mobile-account-badge"
 import { PermissionGate } from "@/components/permission-gate"
+import { InstanviConnectionGate } from "@/components/instanvi-connection-gate"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { FullPageModal } from "@/components/ui/full-page-modal"
@@ -224,17 +225,19 @@ export function PayRunMobileValidationPanel({
             </Button>
           </PermissionGate>
           <PermissionGate permission="payments:write">
-            <Button
-              type="button"
-              size="sm"
-              disabled={!canDisburse || bulkDisburse.isPending}
-              onClick={() => setDisburseOpen(true)}
-            >
-              Disburse
-              {selectedTransactionIds.length > 0
-                ? ` selected (${selectedTransactionIds.length})`
-                : ` all eligible (${eligibleLines.length})`}
-            </Button>
+            <InstanviConnectionGate>
+              <Button
+                type="button"
+                size="sm"
+                disabled={!canDisburse || bulkDisburse.isPending}
+                onClick={() => setDisburseOpen(true)}
+              >
+                Disburse
+                {selectedTransactionIds.length > 0
+                  ? ` selected (${selectedTransactionIds.length})`
+                  : ` all eligible (${eligibleLines.length})`}
+              </Button>
+            </InstanviConnectionGate>
           </PermissionGate>
         </div>
       </div>

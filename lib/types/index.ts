@@ -227,6 +227,15 @@ export interface Company {
   rejectionReason?: string
   approvedAt?: string
   chargeId?: string
+  instanviConnected?: boolean
+  instanviLocationId?: string
+}
+
+export interface InstanviIntegrationConfig {
+  connected: boolean
+  apiKeyLast4?: string
+  locationId?: string
+  connectedAt?: string
 }
 
 export interface KycDocument {

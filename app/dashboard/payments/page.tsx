@@ -6,6 +6,7 @@ import type { ColumnDef } from "@tanstack/react-table"
 import { toast } from "sonner"
 
 import { CompanyApprovalGate } from "@/components/company-approval-gate"
+import { InstanviConnectionGate } from "@/components/instanvi-connection-gate"
 import { DataTableRowActions } from "@/components/data-table/data-table-row-actions"
 import { ServerColumnHeader } from "@/components/data-table/server-column-header"
 import { ServerDataTable } from "@/components/data-table/server-data-table"
@@ -239,10 +240,12 @@ function PaymentsPageContent() {
         toolbarActions={
           <PermissionGate permission="payments:write">
             <CompanyApprovalGate action="run payroll">
-              <Button size="sm" onClick={() => modal.open("create")}>
-                <PlusIcon />
-                Run payroll
-              </Button>
+              <InstanviConnectionGate>
+                <Button size="sm" onClick={() => modal.open("create")}>
+                  <PlusIcon />
+                  Run payroll
+                </Button>
+              </InstanviConnectionGate>
             </CompanyApprovalGate>
           </PermissionGate>
         }
@@ -269,13 +272,15 @@ function PaymentsPageContent() {
         contentClassName="max-w-4xl"
       >
         <CompanyApprovalGate>
-          <PaymentForm
-            onSuccess={() => {
-              modal.close()
-              toast.success("Payroll run created with transactions")
-            }}
-            onCancel={modal.close}
-          />
+          <InstanviConnectionGate>
+            <PaymentForm
+              onSuccess={() => {
+                modal.close()
+                toast.success("Payroll run created with transactions")
+              }}
+              onCancel={modal.close}
+            />
+          </InstanviConnectionGate>
         </CompanyApprovalGate>
       </FullPageModal>
 
