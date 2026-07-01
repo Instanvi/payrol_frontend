@@ -101,12 +101,11 @@ export function PaymentForm({
   }, [projectId, form])
 
   React.useEffect(() => {
-    const ids = Object.keys(rowSelection).filter((key) => rowSelection[key])
-    const selectedIds = ids
-      .map((index) => employees[Number(index)]?.id)
-      .filter(Boolean) as string[]
-    form.setValue("employeeIds", selectedIds)
-  }, [rowSelection, employees, form])
+    const selectedIds = Object.keys(rowSelection).filter(
+      (id) => rowSelection[id]
+    )
+    form.setValue("employeeIds", selectedIds, { shouldValidate: true })
+  }, [rowSelection, form])
 
   const values = form.watch()
 
@@ -356,6 +355,7 @@ export function PaymentForm({
                   data={employees}
                   searchKey="name"
                   searchPlaceholder="Search employees..."
+                  rowSelection={rowSelection}
                   onRowSelectionChange={setRowSelection}
                 />
               )}
