@@ -20,7 +20,7 @@ export default function DashboardLayout({
         <AppSidebar />
         <SidebarInset className="min-w-0 overflow-x-hidden border-l border-black/4 bg-main-bg" data-dashboard>
           <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center gap-2 border-b border-black/6 bg-white sm:h-16">
-            <div className="flex min-w-0 flex-1 items-center gap-2 px-3 sm:px-4">
+            <div className="flex min-w-0 flex-1 items-center gap-2 px-2 sm:px-3">
               <SidebarTrigger className="-ml-1 size-10 shrink-0 sm:size-8" />
               <Separator
                 orientation="vertical"
@@ -31,7 +31,7 @@ export default function DashboardLayout({
               </div>
             </div>
           </header>
-          <div className="flex flex-1 flex-col gap-4 p-3 pt-4 sm:p-4 sm:pt-0">
+          <div className="flex flex-1 flex-col gap-4 p-2.5 pt-3 sm:p-3 sm:pt-0">
             {children}
           </div>
           <DashboardGlobalModals />
