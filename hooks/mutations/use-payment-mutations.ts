@@ -70,6 +70,12 @@ export function useBulkDisburseMutation() {
       queryClient.invalidateQueries({ queryKey: queryKeys.payments.all })
       queryClient.invalidateQueries({ queryKey: queryKeys.transactions.all })
       queryClient.invalidateQueries({
+        queryKey: queryKeys.payments.detail(result.payRunId),
+      })
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.payments.transactions(result.payRunId),
+      })
+      queryClient.invalidateQueries({
         queryKey: queryKeys.payments.mobileValidation(result.payRunId),
       })
       toast.success(

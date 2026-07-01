@@ -80,6 +80,9 @@ export interface MobilePayRunValidation {
   summary: {
     total: number
     pending: number
+    processing: number
+    failed: number
+    completed: number
     mtn: number
     orange: number
     other: number

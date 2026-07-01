@@ -11,6 +11,7 @@ export function dataTableSelectColumn<TData>(): ColumnDef<TData> {
           table.getIsAllPageRowsSelected() ||
           (table.getIsSomePageRowsSelected() && "indeterminate")
         }
+        disabled={!table.getRowModel().rows.some((row) => row.getCanSelect())}
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
         aria-label="Select all"
       />
@@ -18,6 +19,7 @@ export function dataTableSelectColumn<TData>(): ColumnDef<TData> {
     cell: ({ row }) => (
       <Checkbox
         checked={row.getIsSelected()}
+        disabled={!row.getCanSelect()}
         onCheckedChange={(value) => row.toggleSelected(!!value)}
         aria-label="Select row"
       />

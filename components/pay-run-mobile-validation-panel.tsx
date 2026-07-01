@@ -30,6 +30,48 @@ interface PayRunMobileValidationPanelProps {
   payRunStatus: string
 }
 
+const TXN_STATUS_VARIANT: Record<
+  string,
+  "default" | "secondary" | "destructive" | "outline"
+> = {
+  completed: "default",
+  processing: "secondary",
+  pending: "outline",
+  failed: "destructive",
+}
+
+function PayStatusBadge({ line }: { line: MobilePayRunLine }) {
+  if (line.mobileEligible) {
+    return (
+      <Badge variant="default" className="font-normal">
+        {line.transactionStatus === "failed" ? "Retry" : "Ready"}
+      </Badge>
+    )
+  }
+
+  if (line.transactionStatus === "processing") {
+    return (
+      <Badge variant="secondary" className="font-normal">
+        Processing
+      </Badge>
+    )
+  }
+
+  if (line.transactionStatus === "completed") {
+    return (
+      <Badge variant="default" className="font-normal">
+        Paid
+      </Badge>
+    )
+  }
+
+  return (
+    <Badge variant="outline" className="font-normal">
+      No
+    </Badge>
+  )
+}
+
 export function PayRunMobileValidationPanel({
   payRunId,
   payRunStatus,
@@ -44,16 +86,19 @@ export function PayRunMobileValidationPanel({
   const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({})
 
   const eligibleLines = data?.lines.filter((line) => line.mobileEligible) ?? []
-  const selectedTransactionIds = React.useMemo(() => {
+
+  const selectedEligibleIds = React.useMemo(() => {
     if (!data) return []
     return data.lines
-      .filter((line) => rowSelection[line.transactionId])
+      .filter(
+        (line) => rowSelection[line.transactionId] && line.mobileEligible
+      )
       .map((line) => line.transactionId)
   }, [data, rowSelection])
 
   const disburseTargetIds =
-    selectedTransactionIds.length > 0
-      ? selectedTransactionIds
+    selectedEligibleIds.length > 0
+      ? selectedEligibleIds
       : eligibleLines.map((line) => line.transactionId)
 
   const disburseTargetAmount = React.useMemo(() => {
@@ -65,11 +110,28 @@ export function PayRunMobileValidationPanel({
   }, [data, disburseTargetIds])
 
   const disburseTargetCount = disburseTargetIds.length
+  const retryCount = eligibleLines.filter(
+    (line) => line.transactionStatus === "failed"
+  ).length
 
   const uncheckedIds =
     data?.lines
       .filter((line) => !line.accountChecked)
       .map((line) => line.employeeId) ?? []
+
+  React.useEffect(() => {
+    if (!data) return
+    setRowSelection((current) => {
+      const next: RowSelectionState = {}
+      for (const [id, selected] of Object.entries(current)) {
+        const line = data.lines.find((row) => row.transactionId === id)
+        if (selected && line?.mobileEligible) {
+          next[id] = true
+        }
+      }
+      return next
+    })
+  }, [data])
 
   async function handleValidateOne(employeeId: string) {
     setValidatingId(employeeId)
@@ -91,6 +153,11 @@ export function PayRunMobileValidationPanel({
   }
 
   async function handleBulkDisburse() {
+    if (disburseTargetIds.length === 0) {
+      toast.error("No eligible employees selected for disbursement")
+      return
+    }
+
     const idempotencyKey = crypto.randomUUID()
     await bulkDisburse.mutateAsync({
       payRunId,
@@ -134,14 +201,18 @@ export function PayRunMobileValidationPanel({
       ),
     },
     {
+      accessorKey: "transactionStatus",
+      header: "Pay status",
+      cell: ({ row }) => (
+        <Badge variant={TXN_STATUS_VARIANT[row.original.transactionStatus] ?? "outline"}>
+          {row.original.transactionStatus}
+        </Badge>
+      ),
+    },
+    {
       accessorKey: "mobileEligible",
       header: "Mobile",
-      cell: ({ row }) =>
-        row.original.mobileEligible ? (
-          <Badge variant="default">Eligible</Badge>
-        ) : (
-          <Badge variant="outline">No</Badge>
-        ),
+      cell: ({ row }) => <PayStatusBadge line={row.original} />,
     },
     {
       accessorKey: "amount",
@@ -183,9 +254,16 @@ export function PayRunMobileValidationPanel({
   }
 
   const canDisburse =
-    payRunStatus !== "completed" &&
-    disburseTargetCount > 0 &&
-    data.summary.pending > 0
+    payRunStatus !== "completed" && disburseTargetCount > 0
+
+  const disburseButtonLabel =
+    selectedEligibleIds.length > 0
+      ? retryCount > 0 && selectedEligibleIds.length === retryCount
+        ? `Retry selected (${selectedEligibleIds.length})`
+        : `Disburse selected (${selectedEligibleIds.length})`
+      : retryCount > 0 && retryCount === eligibleLines.length
+        ? `Retry failed (${retryCount})`
+        : `Disburse all eligible (${eligibleLines.length})`
 
   return (
     <div className="space-y-4 rounded-xl bg-card p-4">
@@ -196,8 +274,8 @@ export function PayRunMobileValidationPanel({
             <h3 className="text-sm font-medium">Mobile money validation</h3>
           </div>
           <p className="text-xs text-muted-foreground">
-            MTN and Orange mobile money eligibility per employee before bulk
-            disbursement
+            Select pending or failed lines to disburse. Processing and paid lines
+            cannot be selected again.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -232,10 +310,7 @@ export function PayRunMobileValidationPanel({
                 disabled={!canDisburse || bulkDisburse.isPending}
                 onClick={() => setDisburseOpen(true)}
               >
-                Disburse
-                {selectedTransactionIds.length > 0
-                  ? ` selected (${selectedTransactionIds.length})`
-                  : ` all eligible (${eligibleLines.length})`}
+                {disburseButtonLabel}
               </Button>
             </InstanviConnectionGate>
           </PermissionGate>
@@ -244,17 +319,14 @@ export function PayRunMobileValidationPanel({
 
       <div className="grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
         <SummaryStat label="Total" value={data.summary.total} />
-        <SummaryStat label="Unchecked" value={data.summary.unchecked} />
-        <SummaryStat label="Valid accounts" value={data.summary.accountValid} />
-        <SummaryStat
-          label="Mobile eligible"
-          value={data.summary.mobileEligible}
-        />
+        <SummaryStat label="Ready" value={data.summary.mobileEligible} />
+        <SummaryStat label="Processing" value={data.summary.processing} />
+        <SummaryStat label="Failed" value={data.summary.failed} />
+        <SummaryStat label="Paid" value={data.summary.completed} />
         <SummaryStat label="MTN" value={data.summary.mtn} />
         <SummaryStat label="Orange" value={data.summary.orange} />
-        <SummaryStat label="Invalid" value={data.summary.invalid} />
         <SummaryStat
-          label="Mobile total"
+          label="Ready total"
           value={`${data.lines[0]?.currency ?? ""} ${data.summary.totalMobileAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}`.trim()}
         />
       </div>
@@ -263,6 +335,8 @@ export function PayRunMobileValidationPanel({
         columns={columns}
         data={data.lines.map((line) => ({ ...line, id: line.transactionId }))}
         enableRowSelection
+        canSelectRow={(line) => line.mobileEligible}
+        rowSelection={rowSelection}
         onRowSelectionChange={setRowSelection}
         hidePagination={data.lines.length <= 10}
         emptyMessage="No payroll lines to validate."
@@ -271,7 +345,11 @@ export function PayRunMobileValidationPanel({
       <FullPageModal
         open={disburseOpen}
         onOpenChange={setDisburseOpen}
-        title="Disburse mobile money?"
+        title={
+          retryCount > 0 && disburseTargetCount === retryCount
+            ? "Retry failed disbursements?"
+            : "Disburse mobile money?"
+        }
         contentClassName="max-w-lg"
         footer={
           <>
@@ -288,7 +366,7 @@ export function PayRunMobileValidationPanel({
               disabled={bulkDisburse.isPending}
               onClick={() => void handleBulkDisburse()}
             >
-              {bulkDisburse.isPending ? "Queuing..." : "Confirm disbursement"}
+              {bulkDisburse.isPending ? "Queuing..." : "Confirm"}
             </Button>
           </>
         }
@@ -305,10 +383,10 @@ export function PayRunMobileValidationPanel({
             </strong>
             .
           </p>
-          {selectedTransactionIds.length > 0 ? (
-            <p>Only the employees you selected will be paid.</p>
+          {selectedEligibleIds.length > 0 ? (
+            <p>Only the eligible employees you selected will be paid.</p>
           ) : (
-            <p>All mobile-money-eligible employees will be paid.</p>
+            <p>All ready employees (pending or failed) will be paid.</p>
           )}
         </div>
       </FullPageModal>

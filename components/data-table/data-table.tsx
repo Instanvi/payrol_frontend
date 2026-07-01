@@ -37,6 +37,7 @@ interface DataTableProps<TData, TValue> {
   searchPlaceholder?: string
   toolbar?: React.ReactNode
   enableRowSelection?: boolean
+  canSelectRow?: (row: TData) => boolean
   rowSelection?: RowSelectionState
   onRowSelectionChange?: (selection: RowSelectionState) => void
   emptyMessage?: string
@@ -50,6 +51,7 @@ export function DataTable<TData, TValue>({
   searchPlaceholder,
   toolbar,
   enableRowSelection = true,
+  canSelectRow,
   rowSelection: controlledRowSelection,
   onRowSelectionChange,
   emptyMessage = "No results.",
@@ -79,7 +81,9 @@ export function DataTable<TData, TValue>({
       columnVisibility,
       rowSelection,
     },
-    enableRowSelection,
+    enableRowSelection: canSelectRow
+      ? (row) => enableRowSelection && canSelectRow(row.original)
+      : enableRowSelection,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
