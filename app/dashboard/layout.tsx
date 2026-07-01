@@ -16,7 +16,7 @@ export default function DashboardLayout({
 }) {
   return (
     <AuthGuard>
-      <SidebarProvider className="min-h-svh bg-main-bg">
+      <SidebarProvider defaultOpen={false} className="min-h-svh bg-main-bg">
         <AppSidebar />
         <SidebarInset className="min-w-0 overflow-x-hidden border-l border-black/4 bg-main-bg" data-dashboard>
           <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center gap-2 border-b border-black/6 bg-white sm:h-16">
