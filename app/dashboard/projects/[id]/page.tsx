@@ -134,6 +134,17 @@ export default function ProjectDetailPage() {
     )
   }
 
+  const payRunColumns = React.useMemo(
+    () => createPayRunColumns(setViewPayRunId, payRunParams, setPayRunParams),
+    [payRunParams]
+  )
+
+  const transactionColumns = React.useMemo(
+    () =>
+      createTransactionColumns(setViewPayRunId, transactionParams, setTransactionParams),
+    [transactionParams]
+  )
+
   if (projectLoading) {
     return <Skeleton className="h-40 w-full" />
   }
@@ -146,17 +157,6 @@ export default function ProjectDetailPage() {
   const payRunMeta = payRunsData?.meta
   const transactions = transactionsData?.data ?? []
   const transactionMeta = transactionsData?.meta
-
-  const payRunColumns = React.useMemo(
-    () => createPayRunColumns(setViewPayRunId, payRunParams, setPayRunParams),
-    [payRunParams]
-  )
-
-  const transactionColumns = React.useMemo(
-    () =>
-      createTransactionColumns(setViewPayRunId, transactionParams, setTransactionParams),
-    [transactionParams]
-  )
 
   return (
     <div className="space-y-6">
