@@ -228,11 +228,14 @@ export interface Company {
   approvedAt?: string
   chargeId?: string
   instanviConnected?: boolean
+  instanviPaymentsAvailable?: boolean
   instanviLocationId?: string
 }
 
 export interface InstanviIntegrationConfig {
   connected: boolean
+  paymentsAvailable: boolean
+  usingEnvFallback?: boolean
   apiKeyLast4?: string
   locationId?: string
   connectedAt?: string

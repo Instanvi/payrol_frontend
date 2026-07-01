@@ -17,9 +17,13 @@ export function InstanviConnectionGate({ children }: InstanviConnectionGateProps
   const { data, isLoading } = useInstanviIntegrationQuery()
 
   const connected =
-    data?.connected ?? session?.company.instanviConnected ?? false
+    data?.paymentsAvailable ??
+    session?.company.instanviPaymentsAvailable ??
+    data?.connected ??
+    session?.company.instanviConnected ??
+    false
 
-  if (isLoading && session?.company.instanviConnected === undefined) {
+  if (isLoading && session?.company.instanviPaymentsAvailable === undefined) {
     return (
       <div className="rounded-lg bg-muted/40 p-4 text-sm text-muted-foreground">
         Checking Instanvi connection...

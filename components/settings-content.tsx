@@ -89,13 +89,18 @@ export function SettingsContent() {
           <div className="space-y-1">
             <h4 className="text-sm font-medium">Instanvi</h4>
             <p className="text-sm text-muted-foreground">
-              Mobile money payments use your company&apos;s Instanvi API key.
+              Mobile money payments use your company&apos;s Instanvi API key
+              (format: <code className="text-xs">app_…</code>).
             </p>
             {instanviLoading ? (
               <p className="text-sm text-muted-foreground">Loading status...</p>
             ) : instanvi?.connected ? (
               <p className="text-sm font-medium text-emerald-700">
                 Connected {instanvi.apiKeyLast4 ?? ""}
+              </p>
+            ) : instanvi?.usingEnvFallback ? (
+              <p className="text-sm font-medium text-emerald-700">
+                Using platform Instanvi key (save your own key to override)
               </p>
             ) : (
               <p className="text-sm text-muted-foreground">Not connected</p>
@@ -113,7 +118,7 @@ export function SettingsContent() {
                   placeholder={
                     instanvi?.connected
                       ? "Enter a new key to replace the saved key"
-                      : "Paste your Instanvi API key"
+                      : "app_c05a083dc1850605a3b587e0ea0ac47ef0eda26bc7182198"
                   }
                   value={apiKey}
                   onChange={(event) => setApiKey(event.target.value)}
@@ -142,7 +147,10 @@ export function SettingsContent() {
                   type="button"
                   size="sm"
                   variant="outline"
-                  disabled={!instanvi?.connected || testInstanvi.isPending}
+                  disabled={
+                    (!instanvi?.connected && !instanvi?.usingEnvFallback) ||
+                    testInstanvi.isPending
+                  }
                   onClick={() => void testInstanvi.mutateAsync()}
                 >
                   {testInstanvi.isPending ? "Testing..." : "Test connection"}
