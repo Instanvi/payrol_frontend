@@ -111,6 +111,30 @@ export const authService = {
 
     return data
   },
+
+  async forgotPassword(email: string): Promise<{ message: string }> {
+    const { data } = await api.post<{ message: string }>("/auth/forgot-password", {
+      email,
+    })
+    return data
+  },
+
+  async getResetPreview(token: string) {
+    const { data } = await api.get<{
+      email: string
+      name: string
+      expiresAt: string
+    }>(`/auth/reset-password/${encodeURIComponent(token)}`)
+    return data
+  },
+
+  async resetPassword(input: {
+    token: string
+    password: string
+  }): Promise<{ message: string }> {
+    const { data } = await api.post<{ message: string }>("/auth/reset-password", input)
+    return data
+  },
 }
 
 export function getUserInitials(user: Pick<User, "name">): string {

@@ -127,7 +127,7 @@ export function LoginForm() {
             )}
           />
           <Link
-            href="#"
+            href="/forgot-password"
             className="text-sm text-muted-foreground hover:text-foreground"
           >
             Forgot password?
