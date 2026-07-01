@@ -3,11 +3,13 @@
 import * as React from "react"
 import Link from "next/link"
 import { useParams } from "next/navigation"
-import type { ColumnDef } from "@tanstack/react-table"
+import type { ColumnDef, RowSelectionState } from "@tanstack/react-table"
 import { useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 
 import { DataTableRowActions } from "@/components/data-table/data-table-row-actions"
+import { DataTable } from "@/components/data-table/data-table"
+import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header"
 import { ServerColumnHeader } from "@/components/data-table/server-column-header"
 import { ServerDataTable } from "@/components/data-table/server-data-table"
 import { EmployeeImportForm } from "@/components/forms/employee-import-form"
@@ -23,10 +25,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Checkbox } from "@/components/ui/checkbox"
 import { FullPageModal } from "@/components/ui/full-page-modal"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useImportEmployeesMutation } from "@/hooks/mutations/use-employee-mutations"
 import {
   useExportProjectPayrollMutation,
@@ -45,7 +45,9 @@ import { queryKeys } from "@/lib/api/query-keys"
 import type { ListParams } from "@/lib/api/types"
 import { formatDisplayDate } from "@/lib/date-utils"
 import type { CsvEmployeeRow } from "@/lib/validations/employee.schema"
-import type { PaymentBatch, PayrollTransaction, Project, TransactionStatus } from "@/lib/types"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import type { Employee, PaymentBatch, PayrollTransaction, Project, TransactionStatus } from "@/lib/types"
+
 import { ArrowLeftIcon, DownloadIcon, UsersIcon } from "lucide-react"
 
 const TXN_STATUS_VARIANT: Record<
@@ -99,8 +101,14 @@ export default function ProjectDetailPage() {
   const exportMutation = useExportProjectPayrollMutation()
 
   const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set())
+  const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({})
 
   React.useEffect(() => {
+    const nextSelection: RowSelectionState = {}
+    for (const employee of assignedEmployees) {
+      nextSelection[employee.id] = true
+    }
+    setRowSelection(nextSelection)
     setSelectedIds(new Set(assignedEmployees.map((e) => e.id)))
   }, [assignedEmployees])
 
@@ -109,13 +117,11 @@ export default function ProjectDetailPage() {
     setTransactionParams((prev) => ({ ...prev, projectId }))
   }, [projectId])
 
-  function toggleEmployee(id: string, checked: boolean) {
-    setSelectedIds((prev) => {
-      const next = new Set(prev)
-      if (checked) next.add(id)
-      else next.delete(id)
-      return next
-    })
+  function handleRowSelectionChange(selection: RowSelectionState) {
+    setRowSelection(selection)
+    setSelectedIds(
+      new Set(Object.keys(selection).filter((id) => selection[id]))
+    )
   }
 
   async function saveEmployees() {
@@ -145,6 +151,11 @@ export default function ProjectDetailPage() {
     [transactionParams]
   )
 
+  const employeeColumns = React.useMemo(
+    () => createEmployeeColumns(),
+    []
+  )
+
   if (projectLoading) {
     return <Skeleton className="h-40 w-full" />
   }
@@ -159,7 +170,7 @@ export default function ProjectDetailPage() {
   const transactionMeta = transactionsData?.meta
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <PageHeader
         title={project.name}
         description={project.code ?? "Project details"}
@@ -182,8 +193,8 @@ export default function ProjectDetailPage() {
         }
       />
 
-      <Tabs defaultValue="overview" className="gap-4">
-        <TabsList variant="line" className="w-full justify-start overflow-x-auto p-0">
+      <Tabs defaultValue="overview" className="gap-3">
+        <TabsList variant="line" className="w-full justify-start overflow-x-auto">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="employees">Existing employees</TabsTrigger>
           <TabsTrigger value="import">Import employees</TabsTrigger>
@@ -224,77 +235,58 @@ export default function ProjectDetailPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="employees">
-          <Card>
-            <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-              <div>
-                <CardTitle>Add existing employees</CardTitle>
-                <CardDescription>
-                  Select company employees and attach them to this project.
-                </CardDescription>
-              </div>
-              <PermissionGate permission="employees:write">
-                <Button
-                  onClick={saveEmployees}
-                  disabled={setEmployeesMutation.isPending || assignedLoading}
-                >
-                  <UsersIcon className="mr-2 h-4 w-4" />
-                  Save employees
-                </Button>
-              </PermissionGate>
-            </CardHeader>
-            <CardContent>
-              {assignedLoading ? (
-                <Skeleton className="h-32 w-full" />
-              ) : allEmployees.length === 0 ? (
-                <p className="text-sm text-muted-foreground">
-                  No employees available. Add or import employees first.
-                </p>
-              ) : (
-                <ul className="space-y-2">
-                  {allEmployees.map((employee) => (
-                    <li
-                      key={employee.id}
-                      className="flex items-center gap-3 bg-muted/30 p-3"
-                    >
-                      <Checkbox
-                        checked={selectedIds.has(employee.id)}
-                        onCheckedChange={(checked) =>
-                          toggleEmployee(employee.id, checked === true)
-                        }
-                      />
-                      <div className="min-w-0">
-                        <p className="font-medium">{employee.name}</p>
-                        <p className="truncate text-sm text-muted-foreground">
-                          {employee.email}
-                        </p>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </CardContent>
-          </Card>
+        <TabsContent value="employees" className="space-y-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-sm font-semibold">Existing employees</h2>
+              <p className="text-sm text-muted-foreground">
+                Select company employees and attach them to this project.
+              </p>
+            </div>
+            <PermissionGate permission="employees:write">
+              <Button
+                onClick={saveEmployees}
+                disabled={setEmployeesMutation.isPending || assignedLoading}
+              >
+                <UsersIcon className="mr-2 h-4 w-4" />
+                Save employees
+              </Button>
+            </PermissionGate>
+          </div>
+
+          {assignedLoading ? (
+            <Skeleton className="h-40 w-full" />
+          ) : allEmployees.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              No employees available. Add or import employees first.
+            </p>
+          ) : (
+            <DataTable
+              columns={employeeColumns}
+              data={allEmployees}
+              searchKey="name"
+              searchPlaceholder="Search employees..."
+              rowSelection={rowSelection}
+              onRowSelectionChange={handleRowSelectionChange}
+              emptyMessage="No employees found."
+            />
+          )}
         </TabsContent>
 
-        <TabsContent value="import">
-          <Card>
-            <CardHeader>
-              <CardTitle>Import employees</CardTitle>
-              <CardDescription>
-                Upload a CSV here, then switch to the Existing employees tab to add the
-                imported employees to this project.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <PermissionGate permission="employees:import">
-                <EmployeeImportForm
-                  onImport={handleImportEmployees}
-                  isImporting={importMutation.isPending}
-                />
-              </PermissionGate>
-            </CardContent>
-          </Card>
+        <TabsContent value="import" className="space-y-4">
+          <div>
+            <h2 className="text-sm font-semibold">Import employees</h2>
+            <p className="text-sm text-muted-foreground">
+              Upload a CSV here, then switch to the Existing employees tab to add
+              the imported employees to this project.
+            </p>
+          </div>
+          <PermissionGate permission="employees:import">
+            <EmployeeImportForm
+              onImport={handleImportEmployees}
+              isImporting={importMutation.isPending}
+            />
+          </PermissionGate>
         </TabsContent>
 
         <TabsContent value="payments">
@@ -367,6 +359,44 @@ function SummaryCard({
       </CardContent>
     </Card>
   )
+}
+
+function createEmployeeColumns(): ColumnDef<Employee>[] {
+  return [
+    {
+      accessorKey: "name",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Name" />
+      ),
+    },
+    {
+      accessorKey: "email",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Email" />
+      ),
+    },
+    {
+      accessorKey: "department",
+      header: "Department",
+      cell: ({ row }) => row.original.department ?? "—",
+    },
+    {
+      accessorKey: "phone",
+      header: "Mobile",
+      cell: ({ row }) => row.original.phone ?? "—",
+    },
+    {
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ row }) => (
+        <Badge
+          variant={row.original.status === "active" ? "default" : "secondary"}
+        >
+          {row.original.status}
+        </Badge>
+      ),
+    },
+  ]
 }
 
 function createPayRunColumns(

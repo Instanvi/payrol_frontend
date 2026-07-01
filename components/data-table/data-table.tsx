@@ -37,6 +37,7 @@ interface DataTableProps<TData, TValue> {
   searchPlaceholder?: string
   toolbar?: React.ReactNode
   enableRowSelection?: boolean
+  rowSelection?: RowSelectionState
   onRowSelectionChange?: (selection: RowSelectionState) => void
   emptyMessage?: string
   hidePagination?: boolean
@@ -49,6 +50,7 @@ export function DataTable<TData, TValue>({
   searchPlaceholder,
   toolbar,
   enableRowSelection = true,
+  rowSelection: controlledRowSelection,
   onRowSelectionChange,
   emptyMessage = "No results.",
   hidePagination = false,
@@ -59,7 +61,9 @@ export function DataTable<TData, TValue>({
   )
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({})
-  const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({})
+  const [internalRowSelection, setInternalRowSelection] =
+    React.useState<RowSelectionState>({})
+  const rowSelection = controlledRowSelection ?? internalRowSelection
 
   const tableColumns = React.useMemo(
     () => withSelectColumn(columns, enableRowSelection),
@@ -82,7 +86,9 @@ export function DataTable<TData, TValue>({
     onRowSelectionChange: (updater) => {
       const next =
         typeof updater === "function" ? updater(rowSelection) : updater
-      setRowSelection(next)
+      if (controlledRowSelection === undefined) {
+        setInternalRowSelection(next)
+      }
       onRowSelectionChange?.(next)
     },
     getCoreRowModel: getCoreRowModel(),
