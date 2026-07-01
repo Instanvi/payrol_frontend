@@ -46,15 +46,18 @@ interface EmployeeMobileAccountBadgeProps {
     | "accountChecked"
     | "mobileAccountValid"
     | "mobileAccountValidationError"
+    | "mobileAccountHolderName"
     | "mobileCarrier"
     | "mobileAccountValidatedAt"
   >
   showCarrier?: boolean
+  showHolderName?: boolean
 }
 
 export function EmployeeMobileAccountBadge({
   employee,
   showCarrier = false,
+  showHolderName = true,
 }: EmployeeMobileAccountBadgeProps) {
   const checked = employee.accountChecked ?? employee.mobileAccountValid != null
 
@@ -83,6 +86,9 @@ export function EmployeeMobileAccountBadge({
   if (employee.mobileCarrier) {
     tooltipParts.push(`Carrier: ${CARRIER_LABEL[employee.mobileCarrier]}`)
   }
+  if (employee.mobileAccountHolderName) {
+    tooltipParts.push(`MoMo account: ${employee.mobileAccountHolderName}`)
+  }
   if (employee.mobileAccountValidatedAt) {
     tooltipParts.push(
       `Checked: ${new Date(employee.mobileAccountValidatedAt).toLocaleString()}`
@@ -93,11 +99,20 @@ export function EmployeeMobileAccountBadge({
   }
 
   const content = (
-    <div className="flex flex-wrap items-center gap-1.5">
-      {badge}
-      {showCarrier && employee.mobileCarrier && (
-        <MobileCarrierBadge carrier={employee.mobileCarrier} />
-      )}
+    <div className="flex flex-col gap-1">
+      <div className="flex flex-wrap items-center gap-1.5">
+        {badge}
+        {showCarrier && employee.mobileCarrier && (
+          <MobileCarrierBadge carrier={employee.mobileCarrier} />
+        )}
+      </div>
+      {showHolderName &&
+        employee.mobileAccountValid &&
+        employee.mobileAccountHolderName && (
+          <p className="text-xs text-muted-foreground leading-snug">
+            MoMo: {employee.mobileAccountHolderName}
+          </p>
+        )}
     </div>
   )
 

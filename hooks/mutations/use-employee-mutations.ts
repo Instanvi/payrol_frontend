@@ -80,7 +80,10 @@ export function useValidateEmployeeAccountMutation() {
       })
       queryClient.invalidateQueries({ queryKey: queryKeys.payments.all })
       const label = employee.mobileAccountValid ? "valid" : "invalid"
-      toast.success(`${employee.name}: mobile account is ${label}`)
+      const holder = employee.mobileAccountHolderName
+        ? ` — MoMo: ${employee.mobileAccountHolderName}`
+        : ""
+      toast.success(`${employee.name}: mobile account is ${label}${holder}`)
     },
     onError: (error) => toast.error(getErrorMessage(error)),
   })

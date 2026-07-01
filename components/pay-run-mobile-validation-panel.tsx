@@ -205,6 +205,7 @@ export function PayRunMobileValidationPanel({
             accountChecked: row.original.accountChecked,
             mobileAccountValid: row.original.mobileAccountValid,
             mobileAccountValidationError: row.original.error,
+            mobileAccountHolderName: row.original.mobileAccountHolderName,
             mobileCarrier: row.original.carrier,
           }}
         />

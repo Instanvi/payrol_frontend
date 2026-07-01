@@ -31,6 +31,7 @@ export interface Employee {
   mobileAccountValid?: boolean | null
   mobileAccountValidatedAt?: string
   mobileAccountValidationError?: string
+  mobileAccountHolderName?: string | null
   accountChecked?: boolean
 }
 
@@ -43,6 +44,8 @@ export interface EmployeeAccountValidation {
   mobileEligible: boolean
   validatedAt: string | null
   error: string | null
+  accountHolderName?: string | null
+  verificationScope?: "provider_api" | "network_prefix_only"
 }
 
 export interface BulkAccountValidationResult {
@@ -70,6 +73,7 @@ export interface MobilePayRunLine {
   mobileEligible: boolean
   accountChecked: boolean
   mobileAccountValid: boolean | null
+  mobileAccountHolderName?: string | null
   platformFee?: number
   totalCharge?: number
   error?: string
