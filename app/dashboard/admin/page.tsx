@@ -14,6 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
@@ -25,8 +26,22 @@ import {
 } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
 import { adminService } from "@/lib/services/admin.service"
-import type { CompanyStatus } from "@/lib/types"
+import type { CompanyStatus, KycDocumentType } from "@/lib/types"
 import { ApiError } from "@/lib/types"
+
+const KYC_LABELS: Record<KycDocumentType, string> = {
+  business_registration: "Business registration",
+  tax_certificate: "Tax certificate",
+  director_id: "Director / owner ID",
+  bank_statement: "Bank statement",
+  other: "Other",
+}
+
+const REVIEWABLE_STATUSES: CompanyStatus[] = [
+  "draft",
+  "pending_review",
+  "rejected",
+]
 
 export default function AdminCompaniesPage() {
   const queryClient = useQueryClient()
@@ -37,6 +52,7 @@ export default function AdminCompaniesPage() {
   const [rejectReason, setRejectReason] = React.useState("")
   const [selectedChargeId, setSelectedChargeId] = React.useState<string>("")
   const [previewAmount, setPreviewAmount] = React.useState("10000")
+  const [forceApprove, setForceApprove] = React.useState(false)
 
   const companiesQuery = useQuery({
     queryKey: ["admin", "companies", statusFilter],
@@ -66,9 +82,14 @@ export default function AdminCompaniesPage() {
 
   const approveMutation = useMutation({
     mutationFn: (companyId: string) =>
-      adminService.approveCompany(companyId, selectedChargeId || undefined),
+      adminService.approveCompany(
+        companyId,
+        selectedChargeId || undefined,
+        forceApprove
+      ),
     onSuccess: () => {
       toast.success("Company approved — payments enabled with assigned charge")
+      setForceApprove(false)
       void queryClient.invalidateQueries({ queryKey: ["admin"] })
     },
     onError: (e) =>
@@ -98,13 +119,17 @@ export default function AdminCompaniesPage() {
     }
   }, [charges, selectedChargeId])
 
+  const canReview =
+    detail?.company.status &&
+    REVIEWABLE_STATUSES.includes(detail.company.status)
+
   return (
     <div className="grid gap-6 lg:grid-cols-2">
       <Card>
         <CardHeader>
           <CardTitle>Companies</CardTitle>
           <CardDescription>
-            Review KYC documents uploaded via Cloudinary before enabling payments
+            Review KYC documents and company owners before enabling payments
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -121,6 +146,7 @@ export default function AdminCompaniesPage() {
               <SelectItem value="draft">Draft</SelectItem>
               <SelectItem value="approved">Approved</SelectItem>
               <SelectItem value="rejected">Rejected</SelectItem>
+              <SelectItem value="suspended">Suspended</SelectItem>
             </SelectContent>
           </Select>
 
@@ -144,6 +170,12 @@ export default function AdminCompaniesPage() {
                       <p className="text-xs text-muted-foreground">
                         {company.legalName ?? "—"}
                       </p>
+                      {company.owners && company.owners.length > 0 && (
+                        <p className="text-xs text-muted-foreground">
+                          Owner: {company.owners[0]?.name} (
+                          {company.owners[0]?.email})
+                        </p>
+                      )}
                     </div>
                     <CompanyStatusBadge status={company.status} />
                   </button>
@@ -158,7 +190,7 @@ export default function AdminCompaniesPage() {
         <CardHeader>
           <CardTitle>Review detail</CardTitle>
           <CardDescription>
-            View KYC files, assign charges, then approve or reject
+            View KYC files, owners, assign charges, then approve or reject
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -183,12 +215,99 @@ export default function AdminCompaniesPage() {
                   <span className="text-muted-foreground">Address:</span>{" "}
                   {detail.company.address ?? "—"}
                 </p>
+                <p>
+                  <span className="text-muted-foreground">Status:</span>{" "}
+                  <CompanyStatusBadge status={detail.company.status} />
+                </p>
+              </div>
+
+              {detail.owners.length > 0 && (
+                <div>
+                  <p className="mb-2 text-sm font-medium">Owners</p>
+                  <ul className="space-y-2 text-sm">
+                    {detail.owners.map((owner) => (
+                      <li
+                        key={owner.id}
+                        className="rounded-lg border p-2"
+                      >
+                        <p className="font-medium">{owner.name}</p>
+                        <p className="text-muted-foreground">{owner.email}</p>
+                        {owner.phone && (
+                          <p className="text-muted-foreground">{owner.phone}</p>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              <div>
+                <p className="mb-2 text-sm font-medium">KYC checklist</p>
+                <ul className="space-y-1 text-sm">
+                  {(
+                    [
+                      "business_registration",
+                      "tax_certificate",
+                      "director_id",
+                      "bank_statement",
+                      "other",
+                    ] as KycDocumentType[]
+                  ).map((type) => {
+                    const uploaded =
+                      detail.uploadedDocumentTypes?.includes(type)
+                    const missing = detail.missingDocuments?.includes(type)
+                    return (
+                      <li key={type} className="flex items-center gap-2">
+                        <Badge
+                          variant={
+                            uploaded
+                              ? "default"
+                              : missing
+                                ? "destructive"
+                                : "outline"
+                          }
+                        >
+                          {uploaded ? "Uploaded" : missing ? "Missing" : "Optional"}
+                        </Badge>
+                        <span>{KYC_LABELS[type]}</span>
+                      </li>
+                    )
+                  })}
+                </ul>
               </div>
 
               <div>
                 <p className="mb-2 text-sm font-medium">KYC documents</p>
-                <KycDocumentList documents={detail.documents} />
+                {detail.documents.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">
+                    No documents uploaded yet.
+                  </p>
+                ) : (
+                  <KycDocumentList documents={detail.documents} />
+                )}
               </div>
+
+              {detail.reviewEvents.length > 0 && (
+                <div>
+                  <p className="mb-2 text-sm font-medium">Review timeline</p>
+                  <ul className="space-y-2 text-sm">
+                    {detail.reviewEvents.map((event) => (
+                      <li
+                        key={event.id}
+                        className="rounded-lg border p-2"
+                      >
+                        <p className="font-medium capitalize">{event.action}</p>
+                        {event.reason && (
+                          <p className="text-muted-foreground">{event.reason}</p>
+                        )}
+                        <p className="text-xs text-muted-foreground">
+                          {new Date(event.createdAt).toLocaleString()}
+                        </p>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
 
               <div className="space-y-2">
                 <Label>Charge for this company</Label>
@@ -229,34 +348,48 @@ export default function AdminCompaniesPage() {
                 )}
               </div>
 
-              {detail.company.status === "pending_review" && (
-                <div className="flex flex-wrap gap-2">
-                  <Button
-                    onClick={() => approveMutation.mutate(detail.company.id)}
-                    disabled={approveMutation.isPending}
-                  >
-                    Approve company
-                  </Button>
-                  <div className="flex flex-1 flex-col gap-2 sm:flex-row">
-                    <Input
-                      placeholder="Rejection reason"
-                      value={rejectReason}
-                      onChange={(e) => setRejectReason(e.target.value)}
+              {canReview && (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      id="force-approve"
+                      checked={forceApprove}
+                      onCheckedChange={(checked) =>
+                        setForceApprove(checked === true)
+                      }
                     />
+                    <Label htmlFor="force-approve">
+                      Approve despite incomplete KYC
+                    </Label>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
                     <Button
-                      variant="destructive"
-                      disabled={
-                        rejectReason.length < 5 || rejectMutation.isPending
-                      }
-                      onClick={() =>
-                        rejectMutation.mutate({
-                          companyId: detail.company.id,
-                          reason: rejectReason,
-                        })
-                      }
+                      onClick={() => approveMutation.mutate(detail.company.id)}
+                      disabled={approveMutation.isPending}
                     >
-                      Reject
+                      Approve company
                     </Button>
+                    <div className="flex flex-1 flex-col gap-2 sm:flex-row">
+                      <Input
+                        placeholder="Rejection reason"
+                        value={rejectReason}
+                        onChange={(e) => setRejectReason(e.target.value)}
+                      />
+                      <Button
+                        variant="destructive"
+                        disabled={
+                          rejectReason.length < 5 || rejectMutation.isPending
+                        }
+                        onClick={() =>
+                          rejectMutation.mutate({
+                            companyId: detail.company.id,
+                            reason: rejectReason,
+                          })
+                        }
+                      >
+                        Reject
+                      </Button>
+                    </div>
                   </div>
                 </div>
               )}

@@ -11,8 +11,7 @@ const ADMIN_LINKS = [
     href: "/dashboard/admin",
     label: "Company reviews",
     icon: Building2Icon,
-    match: (path: string) =>
-      path === "/dashboard/admin" || path.startsWith("/dashboard/admin/companies"),
+    match: (path: string) => path === "/dashboard/admin",
   },
   {
     href: "/dashboard/admin/fees",

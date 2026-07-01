@@ -9,6 +9,7 @@ export const paymentSchema = z.object({
   amount: z.number().positive("Total payroll amount must be greater than 0"),
   currency: z.enum(["USD", "EUR", "GBP"]),
   scheduledAt: z.string().optional(),
+  projectId: z.string().uuid("Select a project"),
   employeeIds: z
     .array(z.string())
     .min(1, "Select at least one employee"),
@@ -48,6 +49,7 @@ export const paymentFormSchema = z
     amount: z.number().positive("Total payroll amount must be greater than 0"),
     currency: z.enum(["USD", "EUR", "GBP"]),
     scheduledAt: z.date().optional(),
+    projectId: z.string().uuid("Select a project"),
     employeeIds: z
       .array(z.string())
       .min(1, "Select at least one employee"),
@@ -68,6 +70,7 @@ export function paymentFormToPayload(values: PaymentFormInput): PaymentFormValue
     amount: values.amount,
     currency: values.currency,
     scheduledAt: toApiDateString(values.scheduledAt),
+    projectId: values.projectId,
     employeeIds: values.employeeIds,
   }
 }

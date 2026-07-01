@@ -13,6 +13,16 @@ export const queryKeys = {
     detail: (id: string) => [...queryKeys.employees.details(), id] as const,
     active: () => [...queryKeys.employees.all, "active"] as const,
   },
+  projects: {
+    all: ["projects"] as const,
+    lists: () => [...queryKeys.projects.all, "list"] as const,
+    list: (status?: string) =>
+      [...queryKeys.projects.lists(), status ?? "all"] as const,
+    details: () => [...queryKeys.projects.all, "detail"] as const,
+    detail: (id: string) => [...queryKeys.projects.details(), id] as const,
+    employees: (id: string) =>
+      [...queryKeys.projects.all, "employees", id] as const,
+  },
   payments: {
     all: ["payments"] as const,
     lists: () => [...queryKeys.payments.all, "list"] as const,

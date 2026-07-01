@@ -11,6 +11,7 @@ import { ServerColumnHeader } from "@/components/data-table/server-column-header
 import { ServerDataTable } from "@/components/data-table/server-data-table"
 import { PaymentForm } from "@/components/forms/payment-form"
 import { PageHeader } from "@/components/page-header"
+import { ProjectFilter } from "@/components/project-filter"
 import { PayRunDetailContent } from "@/components/pay-run-detail-content"
 import { PermissionGate } from "@/components/permission-gate"
 import { Button } from "@/components/ui/button"
@@ -229,6 +230,12 @@ function PaymentsPageContent() {
         isLoading={isLoading}
         isFetching={isFetching}
         searchPlaceholder="Search by reference or pay period..."
+        toolbarChildren={
+          <ProjectFilter
+            value={params.projectId}
+            onChange={(projectId) => setParams({ projectId, page: 1 })}
+          />
+        }
         toolbarActions={
           <PermissionGate permission="payments:write">
             <CompanyApprovalGate action="run payroll">

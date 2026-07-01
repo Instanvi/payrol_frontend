@@ -8,6 +8,7 @@ import { DataTableRowActions } from "@/components/data-table/data-table-row-acti
 import { ServerColumnHeader } from "@/components/data-table/server-column-header"
 import { ServerDataTable } from "@/components/data-table/server-data-table"
 import { PageHeader } from "@/components/page-header"
+import { ProjectFilter } from "@/components/project-filter"
 import { PayRunDetailContent } from "@/components/pay-run-detail-content"
 import { Badge } from "@/components/ui/badge"
 import { FullPageModal } from "@/components/ui/full-page-modal"
@@ -198,6 +199,12 @@ function TransactionsPageContent() {
         isLoading={isLoading}
         isFetching={isFetching}
         searchPlaceholder="Search employee, reference, pay run..."
+        toolbarChildren={
+          <ProjectFilter
+            value={params.projectId}
+            onChange={(projectId) => setParams({ projectId, page: 1 })}
+          />
+        }
         filters={[
           {
             key: "status",

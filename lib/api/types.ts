@@ -9,6 +9,7 @@ export interface ListParams {
   status?: string
   role?: string
   payRunId?: string
+  projectId?: string
   level?: string
 }
 

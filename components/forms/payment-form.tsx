@@ -11,6 +11,7 @@ import { EmployeeMobileAccountBadge } from "@/components/employee-mobile-account
 import { DatePicker, DateRangePicker } from "@/components/date-picker"
 import { Button } from "@/components/ui/button"
 import { useActiveEmployeesQuery } from "@/hooks/queries/use-employees-query"
+import { useProjectEmployeesQuery, useProjectsQuery } from "@/hooks/queries/use-projects-query"
 import { useCreatePaymentMutation } from "@/hooks/mutations/use-payment-mutations"
 import {
   Form,
@@ -52,8 +53,8 @@ export function PaymentForm({
   onSuccess?: () => void
   onCancel?: () => void
 }) {
-  const { data: employees = [], isLoading: employeesLoading } =
-    useActiveEmployeesQuery()
+  const { data: projects = [], isLoading: projectsLoading } =
+    useProjectsQuery("active")
   const createMutation = useCreatePaymentMutation()
   const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({})
   const [step, setStep] = React.useState<"details" | "recipients" | "review">(
@@ -68,9 +69,30 @@ export function PaymentForm({
       amount: 0,
       currency: "USD",
       scheduledAt: undefined,
+      projectId: "",
       employeeIds: [],
     },
   })
+
+  const projectId = form.watch("projectId")
+  const { data: projectEmployees = [] } = useProjectEmployeesQuery(
+    projectId || null
+  )
+  const { data: allEmployees = [], isLoading: employeesLoading } =
+    useActiveEmployeesQuery()
+
+  const employees = React.useMemo(() => {
+    if (!projectId) return []
+    const projectEmployeeIds = new Set(projectEmployees.map((e) => e.id))
+    return allEmployees.filter((e) => projectEmployeeIds.has(e.id))
+  }, [allEmployees, projectEmployees, projectId])
+
+  const selectedProject = projects.find((p) => p.id === projectId)
+
+  React.useEffect(() => {
+    setRowSelection({})
+    form.setValue("employeeIds", [])
+  }, [projectId, form])
 
   React.useEffect(() => {
     const ids = Object.keys(rowSelection).filter((key) => rowSelection[key])
@@ -130,7 +152,13 @@ export function PaymentForm({
   function handleNext() {
     if (step === "details") {
       form
-        .trigger(["reference", "payPeriodRange", "amount", "currency"])
+        .trigger([
+          "projectId",
+          "reference",
+          "payPeriodRange",
+          "amount",
+          "currency",
+        ])
         .then((valid) => {
           if (valid) setStep("recipients")
         })
@@ -153,6 +181,44 @@ export function PaymentForm({
               </p>
             </div>
             <div className="space-y-4">
+              <FormField
+                control={form.control}
+                name="projectId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Project</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select project" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {projectsLoading ? (
+                          <SelectItem value="loading" disabled>
+                            Loading...
+                          </SelectItem>
+                        ) : projects.length === 0 ? (
+                          <SelectItem value="none" disabled>
+                            No active projects
+                          </SelectItem>
+                        ) : (
+                          projects.map((project) => (
+                            <SelectItem key={project.id} value={project.id}>
+                              {project.name}
+                              {project.code ? ` (${project.code})` : ""}
+                            </SelectItem>
+                          ))
+                        )}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <FormField
                 control={form.control}
                 name="payPeriodRange"
@@ -260,12 +326,22 @@ export function PaymentForm({
             <div className="space-y-1">
               <h3 className="text-base font-medium">Select employees</h3>
               <p className="text-sm text-muted-foreground">
-                Choose who to include in this pay run
+                Choose employees assigned to{" "}
+                {selectedProject?.name ?? "this project"}
               </p>
             </div>
             <div>
-              {employeesLoading ? (
+              {!projectId ? (
+                <p className="text-sm text-muted-foreground">
+                  Select a project in the previous step.
+                </p>
+              ) : employeesLoading ? (
                 <p className="text-sm text-muted-foreground">Loading employees...</p>
+              ) : employees.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  No employees assigned to this project. Assign employees on the
+                  project page first.
+                </p>
               ) : (
                 <DataTable
                   columns={columns}
@@ -297,6 +373,12 @@ export function PaymentForm({
               </p>
             </div>
             <div className="space-y-3 text-sm">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Project</span>
+                <span className="font-medium">
+                  {selectedProject?.name ?? "—"}
+                </span>
+              </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Pay period</span>
                 <span className="font-medium">

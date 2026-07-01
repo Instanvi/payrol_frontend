@@ -23,6 +23,7 @@ import {
   BanknoteIcon,
   UserCogIcon,
   ScrollTextIcon,
+  FolderKanbanIcon,
 } from "lucide-react"
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -48,6 +49,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       title: "Employees",
       href: "/dashboard/employees",
       icon: <UsersIcon />,
+    },
+    {
+      title: "Projects",
+      href: "/dashboard/projects",
+      icon: <FolderKanbanIcon />,
     },
     {
       title: "Pay runs",

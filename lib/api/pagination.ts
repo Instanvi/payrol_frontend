@@ -11,6 +11,7 @@ export function normalizeListParams(params: ListParams = {}) {
     status: params.status?.trim() || undefined,
     role: params.role?.trim() || undefined,
     payRunId: params.payRunId?.trim() || undefined,
+    projectId: params.projectId?.trim() || undefined,
     level: params.level?.trim() || undefined,
   }
 }
@@ -88,6 +89,7 @@ export function listParamsToSearchParams(params: ListParams): URLSearchParams {
   if (normalized.status) searchParams.set("status", normalized.status)
   if (normalized.role) searchParams.set("role", normalized.role)
   if (normalized.payRunId) searchParams.set("payRunId", normalized.payRunId)
+  if (normalized.projectId) searchParams.set("projectId", normalized.projectId)
   if (normalized.level) searchParams.set("level", normalized.level)
 
   return searchParams

@@ -22,7 +22,10 @@ export const paymentsService = {
   },
 
   create(
-    data: Omit<PaymentBatch, "id" | "createdAt" | "status" | "employeeCount">
+    data: Omit<
+      PaymentBatch,
+      "id" | "createdAt" | "status" | "employeeCount"
+    > & { projectId: string }
   ) {
     return api.post<PaymentBatch>("/payments", data).then((res) => res.data)
   },

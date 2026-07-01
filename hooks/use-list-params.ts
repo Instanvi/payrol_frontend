@@ -29,6 +29,7 @@ export function useListParams(defaults: Partial<ListParams> = {}) {
       status: searchParams.get("status") ?? defaults.status,
       role: searchParams.get("role") ?? defaults.role,
       payRunId: searchParams.get("payRunId") ?? defaults.payRunId,
+      projectId: searchParams.get("projectId") ?? defaults.projectId,
       level: searchParams.get("level") ?? defaults.level,
     }
   }, [searchParams, defaults])
@@ -58,6 +59,9 @@ export function useListParams(defaults: Partial<ListParams> = {}) {
 
       if (next.payRunId) urlParams.set("payRunId", next.payRunId)
       else urlParams.delete("payRunId")
+
+      if (next.projectId) urlParams.set("projectId", next.projectId)
+      else urlParams.delete("projectId")
 
       if (next.level) urlParams.set("level", next.level)
       else urlParams.delete("level")

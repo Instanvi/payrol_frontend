@@ -3,14 +3,14 @@ import type {
   AdminCompanyDetail,
   Charge,
   ChargeBreakdown,
-  Company,
   CompanyStatus,
+  CompanyWithOwners,
 } from "@/lib/types"
 
 export const adminService = {
   listCompanies(status?: CompanyStatus) {
     return api
-      .get<{ data: Company[] }>("/admin/companies", {
+      .get<{ data: CompanyWithOwners[] }>("/admin/companies", {
         params: status ? { status } : undefined,
       })
       .then((res) => res.data.data)
@@ -22,10 +22,15 @@ export const adminService = {
       .then((res) => res.data)
   },
 
-  approveCompany(companyId: string, chargeId?: string) {
+  approveCompany(
+    companyId: string,
+    chargeId?: string,
+    forceApprove?: boolean
+  ) {
     return api
       .post<AdminCompanyDetail>(`/admin/companies/${companyId}/approve`, {
         chargeId,
+        forceApprove,
       })
       .then((res) => res.data)
   },

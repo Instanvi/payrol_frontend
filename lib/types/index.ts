@@ -140,6 +140,7 @@ export interface PaymentLog {
 
 export interface PaymentBatch {
   id: string
+  projectId?: string
   reference: string
   payPeriod: string
   amount: number
@@ -156,6 +157,7 @@ export interface PaymentBatch {
 /** Individual mobile money payment to one employee within a pay run */
 export interface PayrollTransaction {
   id: string
+  projectId?: string
   payRunId: string
   payRunReference: string
   payPeriod: string
@@ -268,6 +270,30 @@ export interface ChargeBreakdown {
   totalFee: number
 }
 
+export interface CompanyOwner {
+  id: string
+  name: string
+  email: string
+  phone?: string
+  status: "active" | "invited" | "inactive"
+}
+
+export interface CompanyWithOwners extends Company {
+  owners?: CompanyOwner[]
+}
+
+export interface Project {
+  id: string
+  name: string
+  code?: string
+  description?: string
+  status: "active" | "inactive"
+  employeeCount: number
+  payRunCount: number
+  createdAt: string
+  updatedAt: string
+}
+
 export interface AdminCompanyDetail {
   company: Company
   documents: Array<KycDocument & { storageKey?: string }>
@@ -277,6 +303,9 @@ export interface AdminCompanyDetail {
     reason?: string | null
     createdAt: string
   }>
+  owners: CompanyOwner[]
+  missingDocuments: KycDocumentType[]
+  uploadedDocumentTypes: KycDocumentType[]
 }
 
 export interface Session {
