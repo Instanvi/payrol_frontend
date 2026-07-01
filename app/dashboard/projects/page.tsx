@@ -16,12 +16,8 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+  FullPageModal,
+} from "@/components/ui/full-page-modal"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -82,47 +78,49 @@ function ProjectsPageContent() {
         </div>
       )}
 
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent>
-          <form onSubmit={handleCreate}>
-            <DialogHeader>
-              <DialogTitle>Create project</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="project-name">Name</Label>
-                <Input
-                  id="project-name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="project-code">Code (optional)</Label>
-                <Input
-                  id="project-code"
-                  value={code}
-                  onChange={(e) => setCode(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="project-description">Description</Label>
-                <Textarea
-                  id="project-description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button type="submit" disabled={createMutation.isPending}>
-                Create
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+      <FullPageModal
+        open={open}
+        onOpenChange={setOpen}
+        title="Create project"
+        contentClassName="max-w-lg"
+        footer={
+          <Button
+            type="submit"
+            form="create-project-form"
+            disabled={createMutation.isPending}
+          >
+            Create
+          </Button>
+        }
+      >
+        <form id="create-project-form" onSubmit={handleCreate} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="project-name">Name</Label>
+            <Input
+              id="project-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="project-code">Code (optional)</Label>
+            <Input
+              id="project-code"
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="project-description">Description</Label>
+            <Textarea
+              id="project-description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+          </div>
+        </form>
+      </FullPageModal>
     </div>
   )
 }

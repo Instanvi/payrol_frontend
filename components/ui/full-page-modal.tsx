@@ -31,7 +31,7 @@ function FullPageModal({
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay
           className={cn(
-            "fixed inset-0 z-50 bg-black/50 supports-backdrop-filter:backdrop-blur-sm",
+            "fixed inset-0 z-50 bg-black/10 supports-backdrop-filter:backdrop-blur-xs",
             "data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0"
           )}
         />
@@ -40,13 +40,12 @@ function FullPageModal({
             "fixed inset-0 z-50 flex flex-col bg-background outline-none",
             "data-open:animate-in data-open:fade-in-0 data-open:slide-in-from-bottom-4 data-open:duration-200",
             "data-closed:animate-out data-closed:fade-out-0 data-closed:slide-out-to-bottom-4 data-closed:duration-150",
-            "sm:inset-2 sm:rounded-none sm:border-2 sm:border-border sm:shadow-2xl",
-            "md:inset-4 lg:inset-8",
+            "sm:inset-2 md:inset-4 lg:inset-8",
             className
           )}
         >
-          <header className="flex shrink-0 items-center justify-between gap-4 border-b px-4 py-4 sm:px-6">
-            <DialogPrimitive.Title className="pr-8 text-xl font-semibold tracking-tight">
+          <header className="flex shrink-0 items-center justify-between gap-4 px-4 py-4 sm:px-6">
+            <DialogPrimitive.Title className="pr-8 text-lg font-semibold tracking-tight">
               {title}
             </DialogPrimitive.Title>
             <DialogPrimitive.Close asChild>
@@ -64,7 +63,7 @@ function FullPageModal({
               </div>
             </div>
             {footer && (
-              <footer className="shrink-0 border-t bg-muted/30 px-6 py-4">
+              <footer className="shrink-0 bg-background px-6 py-4">
                 <div className="mx-auto flex w-full max-w-3xl justify-end gap-2">
                   {footer}
                 </div>

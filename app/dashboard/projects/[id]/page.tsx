@@ -144,7 +144,7 @@ export default function ProjectDetailPage() {
                 {payRuns.map((payRun) => (
                   <li
                     key={payRun.id}
-                    className="flex items-center justify-between rounded-lg border p-3 text-sm"
+                    className="flex items-center justify-between bg-muted/30 p-3 text-sm"
                   >
                     <div>
                       <p className="font-medium">{payRun.reference}</p>
@@ -186,7 +186,7 @@ export default function ProjectDetailPage() {
               {allEmployees.map((employee) => (
                 <li
                   key={employee.id}
-                  className="flex items-center gap-3 rounded-lg border p-3"
+                  className="flex items-center gap-3 bg-muted/30 p-3"
                 >
                   <Checkbox
                     checked={selectedIds.has(employee.id)}

@@ -228,7 +228,7 @@ export default function AdminCompaniesPage() {
                     {detail.owners.map((owner) => (
                       <li
                         key={owner.id}
-                        className="rounded-lg border p-2"
+                        className="bg-muted/30 p-2"
                       >
                         <p className="font-medium">{owner.name}</p>
                         <p className="text-muted-foreground">{owner.email}</p>
@@ -294,7 +294,7 @@ export default function AdminCompaniesPage() {
                     {detail.reviewEvents.map((event) => (
                       <li
                         key={event.id}
-                        className="rounded-lg border p-2"
+                        className="bg-muted/30 p-2"
                       >
                         <p className="font-medium capitalize">{event.action}</p>
                         {event.reason && (

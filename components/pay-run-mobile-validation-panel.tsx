@@ -14,16 +14,7 @@ import {
 import { PermissionGate } from "@/components/permission-gate"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
+import { FullPageModal } from "@/components/ui/full-page-modal"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   useValidateEmployeeAccountMutation,
@@ -274,45 +265,50 @@ export function PayRunMobileValidationPanel({
         emptyMessage="No payroll lines to validate."
       />
 
-      <AlertDialog open={disburseOpen} onOpenChange={setDisburseOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Disburse mobile money?</AlertDialogTitle>
-            <AlertDialogDescription asChild>
-              <div className="space-y-3 text-sm text-muted-foreground">
-                <p>
-                  This will queue mobile money payments for{" "}
-                  <strong>{disburseTargetCount}</strong> employee(s) totalling{" "}
-                  <strong>
-                    {data.lines[0]?.currency}{" "}
-                    {disburseTargetAmount.toLocaleString(undefined, {
-                      minimumFractionDigits: 2,
-                    })}
-                  </strong>
-                  .
-                </p>
-                {selectedTransactionIds.length > 0 ? (
-                  <p>Only the employees you selected will be paid.</p>
-                ) : (
-                  <p>All mobile-money-eligible employees will be paid.</p>
-                )}
-              </div>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
+      <FullPageModal
+        open={disburseOpen}
+        onOpenChange={setDisburseOpen}
+        title="Disburse mobile money?"
+        contentClassName="max-w-lg"
+        footer={
+          <>
+            <Button
+              type="button"
+              variant="outline"
               disabled={bulkDisburse.isPending}
-              onClick={(e) => {
-                e.preventDefault()
-                void handleBulkDisburse()
-              }}
+              onClick={() => setDisburseOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              disabled={bulkDisburse.isPending}
+              onClick={() => void handleBulkDisburse()}
             >
               {bulkDisburse.isPending ? "Queuing..." : "Confirm disbursement"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-3 text-sm text-muted-foreground">
+          <p>
+            This will queue mobile money payments for{" "}
+            <strong>{disburseTargetCount}</strong> employee(s) totalling{" "}
+            <strong>
+              {data.lines[0]?.currency}{" "}
+              {disburseTargetAmount.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+              })}
+            </strong>
+            .
+          </p>
+          {selectedTransactionIds.length > 0 ? (
+            <p>Only the employees you selected will be paid.</p>
+          ) : (
+            <p>All mobile-money-eligible employees will be paid.</p>
+          )}
+        </div>
+      </FullPageModal>
     </div>
   )
 }
