@@ -34,7 +34,7 @@ export function DataTableRowActions({ actions }: DataTableRowActionsProps) {
           <MoreHorizontalIcon className="size-4" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent align="end" className="min-w-44">
         {visibleActions.map((action, index) => (
           <div key={action.label}>
             {index > 0 && action.destructive && <DropdownMenuSeparator />}

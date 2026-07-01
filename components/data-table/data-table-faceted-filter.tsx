@@ -1,6 +1,5 @@
 "use client"
 
-import type { Table } from "@tanstack/react-table"
 import { CheckIcon, PlusCircleIcon } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -46,7 +45,7 @@ export function DataTableFacetedFilter({
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" className="border-dashed">
+        <Button variant="outline" size="sm" className="shrink-0 border-dashed whitespace-nowrap">
           <PlusCircleIcon className="size-4" />
           {title}
           {selected && (
@@ -59,7 +58,7 @@ export function DataTableFacetedFilter({
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0" align="start">
+      <PopoverContent className="w-auto min-w-[12rem] p-0" align="start">
         <Command>
           <CommandInput placeholder={title} />
           <CommandList>
@@ -116,7 +115,6 @@ interface ServerDataTableToolbarProps {
   onSearchChange: (value: string) => void
   children?: React.ReactNode
   actions?: React.ReactNode
-  table?: Table<unknown>
 }
 
 export function ServerDataTableToolbar({
@@ -127,16 +125,16 @@ export function ServerDataTableToolbar({
   actions,
 }: ServerDataTableToolbarProps) {
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="flex flex-nowrap items-center gap-2 overflow-x-auto pb-1">
       <Input
-        className="min-w-0 flex-1 basis-[8rem] sm:flex-none sm:basis-auto sm:w-[150px] lg:w-[250px]"
+        className="w-[150px] shrink-0 lg:w-[220px]"
         placeholder={searchPlaceholder}
         value={search}
         onChange={(e) => onSearchChange(e.target.value)}
       />
       {children}
       {actions ? (
-        <div className="ml-auto flex shrink-0 flex-wrap items-center gap-2">
+        <div className="ml-auto flex shrink-0 flex-nowrap items-center gap-2">
           {actions}
         </div>
       ) : null}

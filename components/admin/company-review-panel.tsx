@@ -249,31 +249,35 @@ export function CompanyReviewPanel({
           </p>
         </div>
 
-        <div className="space-y-2">
-          <Label>Charge for this company</Label>
-          <Select value={selectedChargeId} onValueChange={setSelectedChargeId}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select charge" />
-            </SelectTrigger>
-            <SelectContent>
-              {charges.map((charge) => (
-                <SelectItem key={charge.id} value={charge.id}>
-                  {charge.name} — {charge.fixedFee} + {charge.percentFee}%
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        <div className="flex flex-nowrap items-end gap-3 overflow-x-auto pb-1">
+          <div className="min-w-[14rem] shrink-0 space-y-2">
+            <Label>Charge for this company</Label>
+            <Select value={selectedChargeId} onValueChange={setSelectedChargeId}>
+              <SelectTrigger className="w-full min-w-[14rem]">
+                <SelectValue placeholder="Select charge" />
+              </SelectTrigger>
+              <SelectContent>
+                {charges.map((charge) => (
+                  <SelectItem key={charge.id} value={charge.id}>
+                    {charge.name} — {charge.fixedFee} + {charge.percentFee}%
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-        <div className="space-y-2">
-          <Label>Charge preview (sample disbursement)</Label>
-          <Input
-            type="number"
-            value={previewAmount}
-            onChange={(e) => setPreviewAmount(e.target.value)}
-          />
+          <div className="min-w-[10rem] shrink-0 space-y-2">
+            <Label>Charge preview (sample disbursement)</Label>
+            <Input
+              type="number"
+              className="w-full min-w-[10rem]"
+              value={previewAmount}
+              onChange={(e) => setPreviewAmount(e.target.value)}
+            />
+          </div>
+
           {chargePreviewQuery.data && (
-            <p className="text-sm text-muted-foreground">
+            <p className="shrink-0 pb-2 text-sm whitespace-nowrap text-muted-foreground">
               Platform cut:{" "}
               <strong>
                 {chargePreviewQuery.data.totalFee}{" "}
@@ -306,27 +310,28 @@ export function CompanyReviewPanel({
             </Label>
           </div>
 
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-nowrap items-center gap-2 overflow-x-auto pb-1">
             <Button
               onClick={() => approveMutation.mutate()}
               disabled={approveMutation.isPending}
+              className="shrink-0"
             >
               {approveMutation.isPending ? "Validating..." : "Validate & approve"}
             </Button>
-            <div className="flex flex-1 flex-col gap-2 sm:flex-row">
-              <Input
-                placeholder="Rejection reason"
-                value={rejectReason}
-                onChange={(e) => setRejectReason(e.target.value)}
-              />
-              <Button
-                variant="destructive"
-                disabled={rejectReason.length < 5 || rejectMutation.isPending}
-                onClick={() => rejectMutation.mutate(rejectReason)}
-              >
-                Reject
-              </Button>
-            </div>
+            <Input
+              className="min-w-[12rem] shrink-0"
+              placeholder="Rejection reason"
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+            />
+            <Button
+              variant="destructive"
+              className="shrink-0"
+              disabled={rejectReason.length < 5 || rejectMutation.isPending}
+              onClick={() => rejectMutation.mutate(rejectReason)}
+            >
+              Reject
+            </Button>
           </div>
         </section>
       ) : (

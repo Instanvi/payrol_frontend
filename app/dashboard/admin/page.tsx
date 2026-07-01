@@ -51,28 +51,6 @@ export default function AdminCompaniesPage() {
         description="Review company profiles, owners, and KYC before validating accounts"
       />
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <Select
-          value={statusFilter}
-          onValueChange={(v) => setStatusFilter(v as CompanyStatus | "all")}
-        >
-          <SelectTrigger className="w-full sm:w-56">
-            <SelectValue placeholder="Filter by status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All companies</SelectItem>
-            <SelectItem value="pending_review">Pending review</SelectItem>
-            <SelectItem value="draft">Draft</SelectItem>
-            <SelectItem value="approved">Approved</SelectItem>
-            <SelectItem value="rejected">Rejected</SelectItem>
-            <SelectItem value="suspended">Suspended</SelectItem>
-          </SelectContent>
-        </Select>
-        <p className="text-sm text-muted-foreground">
-          {companies.length} compan{companies.length === 1 ? "y" : "ies"}
-        </p>
-      </div>
-
       {companiesQuery.isLoading ? (
         <Skeleton className="h-40 w-full" />
       ) : (
@@ -83,6 +61,31 @@ export default function AdminCompaniesPage() {
           searchPlaceholder="Search companies..."
           enableRowSelection={false}
           emptyMessage="No companies found for this filter."
+          toolbar={
+            <>
+              <Select
+                value={statusFilter}
+                onValueChange={(v) =>
+                  setStatusFilter(v as CompanyStatus | "all")
+                }
+              >
+                <SelectTrigger className="w-[11rem] shrink-0">
+                  <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All companies</SelectItem>
+                  <SelectItem value="pending_review">Pending review</SelectItem>
+                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="approved">Approved</SelectItem>
+                  <SelectItem value="rejected">Rejected</SelectItem>
+                  <SelectItem value="suspended">Suspended</SelectItem>
+                </SelectContent>
+              </Select>
+              <span className="ml-auto shrink-0 text-sm whitespace-nowrap text-muted-foreground">
+                {companies.length} compan{companies.length === 1 ? "y" : "ies"}
+              </span>
+            </>
+          }
         />
       )}
 

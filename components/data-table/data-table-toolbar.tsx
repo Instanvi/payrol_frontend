@@ -3,7 +3,6 @@
 import type { Table } from "@tanstack/react-table"
 
 import { Input } from "@/components/ui/input"
-import { DataTableViewOptions } from "@/components/data-table/data-table-view-options"
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>
@@ -19,23 +18,20 @@ export function DataTableToolbar<TData>({
   children,
 }: DataTableToolbarProps<TData>) {
   return (
-    <div className="flex items-center justify-between">
-      <div className="flex flex-1 items-center space-x-2">
-        {searchKey && (
-          <Input
-            placeholder={searchPlaceholder}
-            value={
-              (table.getColumn(searchKey)?.getFilterValue() as string) ?? ""
-            }
-            onChange={(event) =>
-              table.getColumn(searchKey)?.setFilterValue(event.target.value)
-            }
-            className="w-full sm:w-[150px] lg:w-[250px]"
-          />
-        )}
-        {children}
-      </div>
-      <DataTableViewOptions table={table} />
+    <div className="flex flex-nowrap items-center gap-2 overflow-x-auto pb-1">
+      {searchKey && (
+        <Input
+          placeholder={searchPlaceholder}
+          value={
+            (table.getColumn(searchKey)?.getFilterValue() as string) ?? ""
+          }
+          onChange={(event) =>
+            table.getColumn(searchKey)?.setFilterValue(event.target.value)
+          }
+          className="w-[150px] shrink-0 lg:w-[220px]"
+        />
+      )}
+      {children}
     </div>
   )
 }
