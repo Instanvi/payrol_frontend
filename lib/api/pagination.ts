@@ -13,6 +13,8 @@ export function normalizeListParams(params: ListParams = {}) {
     payRunId: params.payRunId?.trim() || undefined,
     projectId: params.projectId?.trim() || undefined,
     level: params.level?.trim() || undefined,
+    mobileAccountStatus: params.mobileAccountStatus?.trim() || undefined,
+    carrier: params.carrier?.trim() || undefined,
   }
 }
 
@@ -91,6 +93,10 @@ export function listParamsToSearchParams(params: ListParams): URLSearchParams {
   if (normalized.payRunId) searchParams.set("payRunId", normalized.payRunId)
   if (normalized.projectId) searchParams.set("projectId", normalized.projectId)
   if (normalized.level) searchParams.set("level", normalized.level)
+  if (normalized.mobileAccountStatus) {
+    searchParams.set("mobileAccountStatus", normalized.mobileAccountStatus)
+  }
+  if (normalized.carrier) searchParams.set("carrier", normalized.carrier)
 
   return searchParams
 }

@@ -32,7 +32,10 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 interface FacetedFilterConfig {
-  key: "status" | "role" | "level"
+  key: keyof Pick<
+    ListParams,
+    "status" | "role" | "level" | "mobileAccountStatus" | "carrier"
+  >
   title: string
   options: { label: string; value: string }[]
 }

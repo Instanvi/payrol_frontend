@@ -181,6 +181,14 @@ export interface PayrollTransaction {
   amount: number
   currency: string
   employeePhone?: string
+  mobileCarrier?: MobileCarrier
+  mobileAccountValid?: boolean | null
+  mobileAccountHolderName?: string | null
+  mobileAccountValidationError?: string | null
+  paymentProvider?: string
+  paymentExternalId?: string
+  paymentFinancialTransactionId?: string
+  paymentProviderStatus?: string
   reference: string
   status: TransactionStatus
   failureReason?: string

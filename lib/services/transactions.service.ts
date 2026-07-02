@@ -12,6 +12,19 @@ export const transactionsService = {
       .then((res) => res.data)
   },
 
+  async listAll(params: ListParams = {}) {
+    const pageSize = 100
+    const first = await this.list({ ...params, page: 1, pageSize })
+    const rows = [...first.data]
+
+    for (let page = 2; page <= first.meta.totalPages; page++) {
+      const next = await this.list({ ...params, page, pageSize })
+      rows.push(...next.data)
+    }
+
+    return rows
+  },
+
   listByPayRun(payRunId: string) {
     return api
       .get<{ data: PayrollTransaction[] }>(`/payments/${payRunId}/transactions`)

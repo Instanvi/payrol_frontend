@@ -11,6 +11,8 @@ export interface ListParams {
   payRunId?: string
   projectId?: string
   level?: string
+  mobileAccountStatus?: string
+  carrier?: string
 }
 
 export interface PaginationMeta {

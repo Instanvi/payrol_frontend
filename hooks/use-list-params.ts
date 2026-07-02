@@ -31,6 +31,9 @@ export function useListParams(defaults: Partial<ListParams> = {}) {
       payRunId: searchParams.get("payRunId") ?? defaults.payRunId,
       projectId: searchParams.get("projectId") ?? defaults.projectId,
       level: searchParams.get("level") ?? defaults.level,
+      mobileAccountStatus:
+        searchParams.get("mobileAccountStatus") ?? defaults.mobileAccountStatus,
+      carrier: searchParams.get("carrier") ?? defaults.carrier,
     }
   }, [searchParams, defaults])
 
@@ -65,6 +68,13 @@ export function useListParams(defaults: Partial<ListParams> = {}) {
 
       if (next.level) urlParams.set("level", next.level)
       else urlParams.delete("level")
+
+      if (next.mobileAccountStatus) {
+        urlParams.set("mobileAccountStatus", next.mobileAccountStatus)
+      } else urlParams.delete("mobileAccountStatus")
+
+      if (next.carrier) urlParams.set("carrier", next.carrier)
+      else urlParams.delete("carrier")
 
       const query = urlParams.toString()
       const url = query ? `${pathname}?${query}` : pathname
