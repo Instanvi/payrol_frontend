@@ -58,5 +58,12 @@ export function useTransactionsQuery(params: ListParams) {
     queryKey: queryKeys.transactions.list(queryParams),
     queryFn: () => transactionsService.list(queryParams),
     placeholderData: keepPreviousData,
+    refetchInterval: (query) => {
+      const rows = query.state.data?.data
+      if (rows?.some((row) => row.status === "processing")) {
+        return 10_000
+      }
+      return false
+    },
   })
 }
