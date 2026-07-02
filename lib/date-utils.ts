@@ -11,7 +11,7 @@ export function formatDisplayDateTime(value?: string | Date | null) {
   if (!value) return "—"
   const date = typeof value === "string" ? new Date(value) : value
   if (Number.isNaN(date.getTime())) return "—"
-  return format(date, "yyyy-MM-dd HH:mm:ss")
+  return format(date, "yyyy-MM-dd HH:mm:ss XXX")
 }
 
 export function formatPayPeriodLabel(from: Date, to: Date) {

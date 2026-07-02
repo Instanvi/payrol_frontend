@@ -57,7 +57,14 @@ function PaymentLogsPageContent() {
             }
           />
         ),
-        cell: ({ row }) => formatDisplayDateTime(row.original.createdAt),
+        cell: ({ row }) => (
+          <span
+            className="font-mono text-xs whitespace-nowrap"
+            title={row.original.createdAt}
+          >
+            {formatDisplayDateTime(row.original.createdAt)}
+          </span>
+        ),
       },
       {
         accessorKey: "level",
@@ -189,7 +196,10 @@ function PaymentLogsPageContent() {
             <div className="grid gap-3 sm:grid-cols-2">
               <div>
                 <p className="text-muted-foreground">Time</p>
-                <p className="font-medium font-mono text-xs sm:text-sm">
+                <p
+                  className="font-medium font-mono text-xs whitespace-nowrap sm:text-sm"
+                  title={selectedLog.createdAt}
+                >
                   {formatDisplayDateTime(selectedLog.createdAt)}
                 </p>
               </div>
