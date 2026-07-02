@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge"
 import { FullPageModal } from "@/components/ui/full-page-modal"
 import { useListParams } from "@/hooks/use-list-params"
 import { usePaymentLogsQuery } from "@/hooks/queries/use-payment-logs-query"
-import { formatDisplayDate } from "@/lib/date-utils"
+import { formatDisplayDateTime } from "@/lib/date-utils"
 import type { PaymentLog, PaymentLogLevel } from "@/lib/types"
 
 const LEVEL_VARIANT: Record<
@@ -57,7 +57,7 @@ function PaymentLogsPageContent() {
             }
           />
         ),
-        cell: ({ row }) => formatDisplayDate(row.original.createdAt),
+        cell: ({ row }) => formatDisplayDateTime(row.original.createdAt),
       },
       {
         accessorKey: "level",
@@ -189,8 +189,8 @@ function PaymentLogsPageContent() {
             <div className="grid gap-3 sm:grid-cols-2">
               <div>
                 <p className="text-muted-foreground">Time</p>
-                <p className="font-medium">
-                  {formatDisplayDate(selectedLog.createdAt)}
+                <p className="font-medium font-mono text-xs sm:text-sm">
+                  {formatDisplayDateTime(selectedLog.createdAt)}
                 </p>
               </div>
               <div>
